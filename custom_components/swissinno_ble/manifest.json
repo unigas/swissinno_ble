@@ -1,7 +1,7 @@
 {
   "domain": "swissinno_ble",
   "name": "SWISSINNO BLE Trap Sensors",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "documentation": "https://github.com/unigas/swissinno_ble",
   "dependencies": ["bluetooth"],
   "codeowners": ["@unigas"],
@@ -13,4 +13,5 @@
     }
   ]
 }
+
 
