@@ -2,10 +2,11 @@
   "name": "SWISSINNO BLE Trap Sensors",
   "domain": "swissinno_ble",
   "country": ["global"],
-  "homeassistant": "2025.1.0",
+  "homeassistant": "2024.9.0",
   "render_readme": true,
   "filename": "custom_components/swissinno_ble",
   "zip_release": false,
   "source": "github",
   "hide_default_branch": false
 }
+
