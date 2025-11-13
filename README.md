@@ -177,10 +177,7 @@ Contributions are welcome!
 # 🧭 Roadmap
 
 ✔️ BLE Trap Reset Support (v1.0.12)  
-⬜ Trap Health Summary Sensor  
-⬜ Improved Bluetooth scanning stability  
-⬜ Custom trap artwork / icon set  
-⬜ Specialized Lovelace trap card  
+
 
 ---
 
