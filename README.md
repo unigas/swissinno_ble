@@ -1,143 +1,190 @@
 # 🐀 SWISSINNO BLE Trap Integration for Home Assistant
 
-A **custom Home Assistant integration** for **SWISSINNO Connect SuperCat**, allowing real-time monitoring of **trap status, battery levels, and signal strength (RSSI).**  
+A **custom Home Assistant integration** for the **SWISSINNO Connect SuperCat**, enabling real-time monitoring **and wireless control** of your mousetraps over Bluetooth Low Energy (BLE).
+
+This integration now supports **remote trap reset**, allowing you to reset a trap from *“Caught” → “Ready”* without touching it.
 
 ![image](https://github.com/user-attachments/assets/99f7ad4c-0344-4547-89e7-5c4329c465a4)
- 
-
----
-If you like this integration please consider [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support%20Me!-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/unigas)
-
-
----
-## 🚀 Features
-✔️ **Automatic BLE scanning** – Detects traps without manual pairing.  
-✔️ **Trap Status Monitoring** – See if traps are set or triggered.  
-✔️ **Battery Level Sensor** – Displays accurate battery voltage.  
-✔️ **Signal Strength (RSSI) Sensor** – Helps position traps for best connectivity.  
-✔️ **Custom Lovelace Dashboard** – Displays traps visually with dynamic icons.  
 
 ---
 
-## 📥 Installation
-### 1️⃣ **Manual Installation**
-1. Download the `custom_components/swissinno_ble` folder.
-2. Place it inside your Home Assistant `config/custom_components/` directory.
-3. Restart Home Assistant.
-4. Go to **Settings → Devices & Services** and add "SWISSINNO BLE."
-
-### 2️⃣ **HACS Installation**
-To install this integration via **HACS (Home Assistant Community Store)**, follow these steps:
-
-1. Open **HACS** in Home Assistant  
-2. Navigate to **Integrations**  
-3. Click **"➕" (Add Custom Repository)**  
-4. Enter the following URL:  
-   ```
-   https://github.com/unigas/swissinno_ble
-   ```
-5. Select **"Integration"** as the category  
-6. Click **"Add"**  
-7. Go to **HACS → Integrations**, find **SWISSINNO BLE**, and install it  
-8. Restart Home Assistant  
-9. Go to **Settings → Devices & Services → Add Integration**  
-10. Search for **SWISSINNO BLE** and click **Install**  
+If you like this integration please consider:  
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support%20Me!-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/unigas)
 
 ---
 
-🔹 **After installation, the integration will automatically detect nearby SWISSINNO traps.**  
+# 🚀 Features
+
+### ✔️ Automatic BLE Scanning  
+Detects traps instantly — no pairing or manual configuration required.
+
+### ✔️ Trap Status Monitoring  
+Real-time detection of **triggered vs. ready** state.
+
+### ✔️ Battery Voltage Sensor  
+Accurate battery readings with automatic updates.
+
+### ✔️ RSSI (Signal Strength) Sensor  
+Helps you place traps for optimal Bluetooth coverage.
+
+### ✔️ **NEW: Remote BLE Reset**  
+Each trap now exposes a **Reset Trap** button in Home Assistant.  
+Pressing it sends a BLE write command to clear the “caught” state via GATT.
+
+### ✔️ Lovelace UI Support  
+Includes example cards with icons, states, and reset control.
+
+### ✔️ Fully Plug-and-Play  
+No YAML needed. Everything is auto-discovered.
 
 ---
 
-## ⚙️ Configuration
-Once installed, Home Assistant will **automatically detect nearby SWISSINNO traps**.  
-You **do not** need to manually configure YAML.  
+# 📥 Installation
 
-To customize the **Lovelace UI**, follow the instructions below.  
+## 1️⃣ Manual Installation
+1. Download (or clone) the `custom_components/swissinno_ble` folder.  
+2. Place it inside your Home Assistant:  
+
+```
+config/custom_components/
+```
+
+3. Restart Home Assistant.  
+4. Go to **Settings → Devices & Services → Add Integration → SWISSINNO BLE**.
 
 ---
 
-## 📊 Lovelace Dashboard
-### **Basic Lovelace Card**
-Use this Lovelace configuration to monitor trap status, battery level, and signal strength:  
+## 2️⃣ HACS Installation
+1. Open **HACS → Integrations**  
+2. Click **+ Explore & Add Repositories**  
+3. Add this repository:
+
+```
+https://github.com/unigas/swissinno_ble
+```
+
+4. Choose **Integration**  
+5. Install and restart Home Assistant  
+6. Add the integration from **Settings → Devices & Services**
+
+The integration will immediately begin scanning for nearby traps.
+
+---
+
+# ⚙️ Configuration
+
+No YAML configuration is needed.  
+When a trap is detected, the following entities are created automatically:
+
+### Entities per trap:
+- `binary_sensor.swissinno_trap_<ID>` – **Trap triggered / ready**
+- `sensor.swissinno_battery_<ID>` – **Battery voltage**
+- `sensor.swissinno_rssi_<ID>` – **Bluetooth signal strength**
+- `button.swissinno_trap_<ID>_reset` – **Reset Trap** (BLE GATT write)
+
+---
+
+# 🔘 Reset Trap (BLE Write Support)
+
+Each trap includes a **Reset Trap** button entity that resets the device using Bluetooth.
+
+### BLE Command Details
+- **Characteristic UUID:** `02ECC6CD-2B43-4DB5-96E6-EDE92CF8778D`  
+- **Payload:** `0x00`  
+- **Transport:** Home Assistant Bluetooth (supports proxies like ESPHome)
+
+### Example Automation
+
+```yaml
+alias: Auto Reset Trap After Notification
+trigger:
+  - platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: reset_kitchen_trap
+action:
+  - service: button.press
+    target:
+      entity_id: button.swissinno_trap_DC140300_reset
+```
+
+Replace `DC140300` with your own trap ID.
+
+---
+
+# 📊 Lovelace Dashboard Example
 
 ```yaml
 type: entities
-title: 🐀 SWISSINNO Traps
+title: 🐀 SWISSINNO Trap — Kitchen
 show_header_toggle: false
 entities:
   - entity: binary_sensor.swissinno_trap_DC140300
     name: Trap Status
-    icon: mdi:rodent
     state_color: true
+    icon: mdi:rodent
 
   - type: custom:template-entity-row
     entity: sensor.swissinno_battery_DC140300
     name: Battery Level
     state: "{{ states('sensor.swissinno_battery_DC140300') | round(2) }} V"
-    icon: >-
-      {% raw %}
-      {% set battery = states('sensor.swissinno_battery_DC140300') | float(0) %}
-      {% if battery >= 3.0 %} mdi:battery
-      {% elif battery >= 2.8 %} mdi:battery-80
-      {% elif battery >= 2.6 %} mdi:battery-60
-      {% elif battery >= 2.4 %} mdi:battery-40
-      {% elif battery >= 2.2 %} mdi:battery-20
-      {% else %} mdi:battery-alert
-      {% endif %}
-      {% endraw %}
 
   - entity: sensor.swissinno_rssi_DC140300
     name: Signal Strength
-    icon: mdi:wifi
+
+  - entity: button.swissinno_trap_DC140300_reset
+    name: Reset Trap
 ```
 
-🔹 **Tip:**  
-- Replace `DC140300` with your trap’s actual ID.  
-- Install [Template Entity Row](https://github.com/thomasloven/lovelace-template-entity-row) via HACS to enable dynamic battery icons.  
+💡 Tip: Install **Lovelace Template Entity Row** via HACS.
 
 ---
 
-## 🔧 Troubleshooting
-### ❓ **No devices are found?**
-✔️ Ensure your Home Assistant device has **Bluetooth enabled**.  
-✔️ Check **Settings → Devices & Services → Bluetooth** to verify BLE is working.  
-✔️ **Restart Home Assistant** after installation.  
+# 🛠 Troubleshooting
 
-### ❓ **Battery voltage is incorrect?**
-✔️ Ensure you are using the latest version of this integration.  
-✔️ The correct formula for battery voltage is:  
-  ```
-  Voltage = (Raw Value * 3.6) / 255
-  ```
+### ❓ No traps found?
+- Ensure Bluetooth is enabled  
+- ESPHome BLE proxies must be online  
+- Try restarting Home Assistant  
 
-### ❓ **Trap status doesn’t update?**
-✔️ Move the trap **closer to Home Assistant** for better signal reception.  
-✔️ Check **Developer Tools → States** for `binary_sensor.swissinno_trap_<ID>` state.  
+### ❓ Wrong battery level?
+Correct conversion formula:
 
----
+```
+Voltage = (raw * 3.6) / 255
+```
 
-## 🤝 Contributing
-🚀 **Want to improve this integration?** Contributions are welcome!  
-- Open an **issue** for bug reports or feature requests.  
-- Fork the repository and submit a **pull request**.  
+### ❓ Trap state updates slowly?
+Move the trap closer to the receiver or use more BLE proxies.
 
 ---
 
-## 📜 License
-**MIT License** – Free to use and modify.  
+# 🤝 Contributing
 
-📌 **Enjoy automating your SWISSINNO traps in Home Assistant!** 🚀🔥  
-
----
-
-## 📌 Future Improvements  
-✔️ **HACS Support** (planned)  
-✔️ **More Lovelace UI options**  
-✔️ **Custom SWISSINNO BLE logo**  
-✔️ **Optimized Bluetooth scanning**  
+Contributions are welcome!
+- Found a bug? Open an issue.  
+- Want a new feature? Create a pull request.  
+- Improvements to decoding or UI are highly appreciated.  
 
 ---
 
-## 📢 Need Help?
-💬 **Open a GitHub issue** or ask in the Home Assistant community!  
+# 📜 License
+
+**MIT License** — free to modify and redistribute.
+
+---
+
+# 🧭 Roadmap
+
+✔️ BLE Trap Reset Support (v1.0.12)  
+⬜ Trap Health Summary Sensor  
+⬜ Improved Bluetooth scanning stability  
+⬜ Custom trap artwork / icon set  
+⬜ Specialized Lovelace trap card  
+
+---
+
+# 📢 Need Help?
+
+Open an issue on GitHub or reach out via Home Assistant forums.  
+Happy automating, and enjoy smarter pest control! 🐭✨
