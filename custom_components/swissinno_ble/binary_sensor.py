@@ -1,112 +1,111 @@
 import asyncio
 import logging
+from datetime import datetime, timedelta
+
 from homeassistant.components.bluetooth import (
     BluetoothServiceInfoBleak,
     async_register_callback,
     BluetoothScanningMode,
 )
 from homeassistant.components.binary_sensor import BinarySensorEntity
-from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from datetime import datetime, timedelta
-from .const import DOMAIN
+from homeassistant.helpers.entity import DeviceInfo
+
+from .const import DOMAIN, MANUFACTURER_ID
+from .decoder import decode_frame
 
 _LOGGER = logging.getLogger(__name__)
 
-MANUFACTURER_ID = 0x0BBB  # SWISSINNO Manufacturer ID
-LAST_SEEN_TIMEOUT = timedelta(minutes=10)  # Make trap unavailable if unseen for 10 minutes
+LAST_SEEN_TIMEOUT = timedelta(minutes=30)
+
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
-    """Set up SWISSINNO BLE binary sensors using HA’s Bluetooth API."""
-    
+    """Set up SWISSINNO BLE binary sensors."""
     _LOGGER.info("SWISSINNO BLE: Registering Bluetooth scanner callback...")
+
     sensors = {}
 
     @callback
     def detection_callback(service_info: BluetoothServiceInfoBleak, change):
-        """Callback for BLE advertisement detection via Home Assistant."""
-        _LOGGER.debug(f"SWISSINNO BLE: Found BLE device: {service_info.name} - Address: {service_info.address}")
-
+        """Handle BLE advertisements."""
         manufacturer_data = service_info.manufacturer_data
-        if MANUFACTURER_ID in manufacturer_data:
-            data = manufacturer_data[MANUFACTURER_ID]
-            rssi = service_info.rssi
+        if MANUFACTURER_ID not in manufacturer_data:
+            return
 
-            if len(data) >= 9:
-                trap_id = f"{data[2]:02X}{data[3]:02X}{data[4]:02X}{data[5]:02X}"
-                tripped = data[0] == 0x01
+        frame = decode_frame(manufacturer_data[MANUFACTURER_ID])
+        if not frame:
+            return
 
-                # ✅ Extract battery voltage from byte 8 (after manufacturer ID)
-                battery_raw = data[7]  
-                battery_v = round((battery_raw * 3.6) / 255, 2)  # Correct voltage conversion
+        trap_id = frame.trap_id
+        rssi = service_info.rssi
 
-                _LOGGER.info(f"SWISSINNO BLE: Updating trap {trap_id}, Tripped: {tripped}, RSSI: {rssi} dBm, Battery: {battery_v} V")
+        _LOGGER.info(
+            f"SWISSINNO BLE: Trap {trap_id} | Tripped={frame.is_tripped} "
+            f"RSSI={rssi} dBm | Battery={frame.battery_volts} V"
+        )
 
-                if trap_id in sensors:
-                    sensors[trap_id].update_state(tripped)
-                else:
-                    _LOGGER.info(f"SWISSINNO BLE: Creating new binary sensor for {trap_id}")
-                    trap_sensor = SwissinnoTrapSensor(service_info.address, trap_id, tripped)
-                    sensors[trap_id] = trap_sensor
-                    async_add_entities([trap_sensor], update_before_add=True)
+        # Update or create the binary sensor
+        if trap_id in sensors:
+            sensors[trap_id].update_state(frame.is_tripped)
+        else:
+            sensor = SwissinnoTrapSensor(service_info.address, trap_id, frame.is_tripped)
+            sensors[trap_id] = sensor
+            async_add_entities([sensor], update_before_add=True)
 
-                if "update_sensors" in hass.data.get(DOMAIN, {}):
-                    hass.async_create_task(hass.data[DOMAIN]["update_sensors"](trap_id, service_info.address, rssi, battery_v))
-                else:
-                    _LOGGER.warning(f"SWISSINNO BLE: `update_sensors` not found, retrying in 5 seconds.")
+        # Forward to battery + RSSI sensors if present
+        if DOMAIN in hass.data and "update_sensors" in hass.data[DOMAIN]:
+            hass.async_create_task(
+                hass.data[DOMAIN]["update_sensors"](
+                    trap_id,
+                    service_info.address,
+                    rssi,
+                    frame.battery_volts,
+                )
+            )
 
-                    async def retry_update():
-                        await asyncio.sleep(5)
-                        if "update_sensors" in hass.data.get(DOMAIN, {}):
-                            _LOGGER.info(f"SWISSINNO BLE: Retrying sensor updates for {trap_id}")
-                            hass.async_create_task(hass.data[DOMAIN]["update_sensors"](trap_id, service_info.address, rssi, battery_v))
-                        else:
-                            _LOGGER.error(f"SWISSINNO BLE: `update_sensors` still missing after retry.")
-
-                    hass.async_create_task(retry_update())
-
-    cancel_callback = async_register_callback(hass, detection_callback, {}, BluetoothScanningMode.PASSIVE)
+    cancel_callback = async_register_callback(
+        hass,
+        detection_callback,
+        {},
+        BluetoothScanningMode.PASSIVE,
+    )
     hass.bus.async_listen_once("homeassistant_stop", cancel_callback)
 
     _LOGGER.info("SWISSINNO BLE: Bluetooth scanner callback registered successfully!")
 
-class SwissinnoTrapSensor(BinarySensorEntity):
-    """Representation of a SWISSINNO Trap."""
 
-    def __init__(self, address, trap_id, is_tripped):
+class SwissinnoTrapSensor(BinarySensorEntity):
+    """Representation of a SWISSINNO BLE trap state."""
+
+    _attr_device_class = "problem"
+
+    def __init__(self, address: str, trap_id: str, is_tripped: bool):
         _LOGGER.info(f"SWISSINNO BLE: Creating sensor for trap {trap_id}")
+
         self._attr_name = f"SWISSINNO Trap {trap_id}"
         self._attr_unique_id = f"swissinno_trap_{trap_id}"
-        self._attr_device_class = "motion"
-        self._attr_icon = "mdi:rodent"  # ✅ Updated to use `mdi:rodent`
         self._state = is_tripped
         self._last_seen = datetime.utcnow()
-        self._attr_should_poll = False  # No polling needed for BLE
+
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, address)},
+            identifiers={(DOMAIN, trap_id)},
             name=f"SWISSINNO Trap {trap_id}",
             manufacturer="SWISSINNO",
-            model="BLE Trap Sensor"
         )
-
-    async def async_added_to_hass(self):
-        """Ensure the entity is properly registered in Home Assistant."""
-        _LOGGER.info(f"SWISSINNO BLE: Successfully added sensor {self._attr_unique_id} to HA.")
 
     @property
     def is_on(self):
-        """Return the state of the trap."""
+        """Device is ON when it is tripped."""
         return self._state
 
     @property
     def available(self):
-        """Make the trap unavailable if not detected for a certain time."""
+        """Trap becomes unavailable if not updated recently."""
         return datetime.utcnow() - self._last_seen < LAST_SEEN_TIMEOUT
 
-    def update_state(self, is_tripped):
-        """Update trap state and refresh last seen timestamp."""
-        _LOGGER.info(f"SWISSINNO BLE: Updating state for {self._attr_unique_id} - Tripped: {is_tripped}")
+    def update_state(self, is_tripped: bool):
+        """Update trap state."""
         self._state = is_tripped
         self._last_seen = datetime.utcnow()
-        self.async_write_ha_state()  # Forces HA to update the entity state
+        self.async_write_ha_state()
