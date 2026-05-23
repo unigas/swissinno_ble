@@ -1,0 +1,14 @@
+{
+  "title": "SWISSINNO BLE Fallensensoren",
+  "config": {
+    "step": {
+      "user": {
+        "title": "SWISSINNO BLE Einrichtung",
+        "description": "Erkennt SWISSINNO Bluetooth-Fallen automatisch.",
+        "data": {
+          "scan_interval": "Scan-Intervall (Sekunden)"
+        }
+      }
+    }
+  }
+}
