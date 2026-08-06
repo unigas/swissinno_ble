@@ -1,0 +1,37 @@
+{
+  "title": "SWISSINNO BLE-fällsensorer",
+  "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE är redan konfigurerad."
+    },
+    "step": {
+      "user": {
+        "title": "Konfigurera SWISSINNO BLE",
+        "description": "Identifierar automatiskt alla SWISSINNO Bluetooth-fällor.",
+        "data": {
+          "device_name": "Integrationsnamn"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Status"
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Återställ fälla"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Batterispänning"
+      },
+      "signal_strength": {
+        "name": "Signalstyrka"
+      }
+    }
+  }
+}

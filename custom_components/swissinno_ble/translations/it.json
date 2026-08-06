@@ -1,0 +1,37 @@
+{
+  "title": "Sensori per trappole SWISSINNO BLE",
+  "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE è già configurata."
+    },
+    "step": {
+      "user": {
+        "title": "Configurazione di SWISSINNO BLE",
+        "description": "Rileva automaticamente tutte le trappole Bluetooth SWISSINNO.",
+        "data": {
+          "device_name": "Nome dell'integrazione"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Stato"
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Reimposta trappola"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Tensione della batteria"
+      },
+      "signal_strength": {
+        "name": "Potenza del segnale"
+      }
+    }
+  }
+}

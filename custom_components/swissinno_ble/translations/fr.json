@@ -1,0 +1,37 @@
+{
+  "title": "Capteurs de pièges SWISSINNO BLE",
+  "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE est déjà configurée."
+    },
+    "step": {
+      "user": {
+        "title": "Configuration de SWISSINNO BLE",
+        "description": "Détecte automatiquement tous les pièges Bluetooth SWISSINNO.",
+        "data": {
+          "device_name": "Nom de l'intégration"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "État"
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Réinitialiser le piège"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Tension de la batterie"
+      },
+      "signal_strength": {
+        "name": "Puissance du signal"
+      }
+    }
+  }
+}
