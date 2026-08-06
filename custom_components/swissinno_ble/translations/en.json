@@ -6,7 +6,19 @@
         "title": "SWISSINNO BLE Setup",
         "description": "Automatically detects SWISSINNO Bluetooth traps.",
         "data": {
-          "scan_interval": "Scan Interval (seconds)"
+          "device_name": "Device name",
+          "track_all_devices": "Track all detected traps"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "SWISSINNO BLE Options",
+        "description": "Choose how traps should be tracked.",
+        "data": {
+          "track_all_devices": "Track all detected traps"
         }
       }
     }
