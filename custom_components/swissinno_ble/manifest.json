@@ -1,14 +1,18 @@
 {
   "domain": "swissinno_ble",
   "name": "SWISSINNO BLE Trap Sensors",
-  "version": "1.0.15",
-  "documentation": "https://github.com/unigas/swissinno_ble",
-  "dependencies": ["bluetooth"],
-  "codeowners": ["@unigas"],
-  "iot_class": "local_push",
-  "requirements": [],
   "bluetooth": [
     { "manufacturer_id": 3003 },
     { "service_uuid": "0000fcd6-0000-1000-8000-00805f9b34fb" }
-  ]
+  ],
+  "codeowners": ["@unigas"],
+  "config_flow": true,
+  "dependencies": ["bluetooth", "bluetooth_adapters"],
+  "documentation": "https://github.com/unigas/swissinno_ble",
+  "integration_type": "hub",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/unigas/swissinno_ble/issues",
+  "requirements": [],
+  "single_config_entry": true,
+  "version": "1.0.16"
 }

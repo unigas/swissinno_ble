@@ -1,13 +1,36 @@
 {
   "title": "SWISSINNO BLE Trap Sensors",
   "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE is already configured."
+    },
     "step": {
       "user": {
         "title": "SWISSINNO BLE Setup",
-        "description": "Automatically detects SWISSINNO Bluetooth traps.",
+        "description": "Automatically detects all SWISSINNO Bluetooth traps.",
         "data": {
-          "scan_interval": "Scan Interval (seconds)"
+          "device_name": "Integration name"
         }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Status"
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Reset trap"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Battery voltage"
+      },
+      "signal_strength": {
+        "name": "Signal strength"
       }
     }
   }
