@@ -29,6 +29,7 @@ class DecoderTests(unittest.TestCase):
         self.assertEqual(frame.device_type, 0x01)
         self.assertIsNone(frame.event_counter)
         self.assertEqual(frame.trap_id, "CE030400")
+        self.assertEqual(frame.legacy_trap_ids, ("CE030400", "3FCE03"))
         self.assertEqual(frame.battery_volts, 3.08)
 
     def test_connect_triggered_frame(self):
@@ -146,6 +147,15 @@ class DecoderTests(unittest.TestCase):
         self.assertEqual(
             const.legacy_unique_ids("DC140300"),
             ("swissinno_trap_DC140300", "swissinno_trap_dc140300"),
+        )
+        self.assertEqual(
+            const.legacy_unique_ids(("CE030400", "3FCE03")),
+            (
+                "swissinno_trap_CE030400",
+                "swissinno_trap_ce030400",
+                "swissinno_trap_3FCE03",
+                "swissinno_trap_3fce03",
+            ),
         )
         self.assertEqual(const.STATUS_READY, 0x00)
         self.assertEqual(const.STATUS_TRIGGERED, 0x01)

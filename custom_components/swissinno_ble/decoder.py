@@ -18,6 +18,7 @@ class DecodedTrapFrame:
     status: int
     is_tripped: bool | None
     trap_id: str
+    legacy_trap_ids: tuple[str, ...]
     battery_raw: int | None
     battery_volts: float | None
 
@@ -41,6 +42,11 @@ def _decode_binary_status(status: int) -> bool | None:
     if status == STATUS_TRIGGERED:
         return True
     return None
+
+
+def _hex_id(value: bytes) -> str:
+    """Return the uppercase hexadecimal form used by legacy entity IDs."""
+    return value.hex().upper()
 
 
 def decode_frame(payload: bytes) -> DecodedTrapFrame | None:
@@ -72,7 +78,8 @@ def decode_frame(payload: bytes) -> DecodedTrapFrame | None:
             event_counter=None,
             status=status,
             is_tripped=_decode_binary_status(status),
-            trap_id="".join(f"{byte:02X}" for byte in trap_id_bytes),
+            trap_id=_hex_id(trap_id_bytes),
+            legacy_trap_ids=(_hex_id(trap_id_bytes),),
             battery_raw=battery_raw,
             battery_volts=_extended_battery_to_volts(battery_raw),
         )
@@ -94,13 +101,16 @@ def decode_frame(payload: bytes) -> DecodedTrapFrame | None:
         battery_raw = payload[7] if len(payload) > 7 else None
         battery_volts = _battery_to_volts(battery_raw)
 
+        trap_id = _hex_id(trap_id_bytes)
         return DecodedTrapFrame(
             version=payload[1],
             device_type=payload[6],
             event_counter=None,
             status=status,
             is_tripped=_decode_binary_status(status),
-            trap_id="".join(f"{byte:02X}" for byte in trap_id_bytes),
+            trap_id=trap_id,
+            # Version 1.0.14 used payload[1:4] for Connect identities.
+            legacy_trap_ids=(trap_id, _hex_id(payload[1:4])),
             battery_raw=battery_raw,
             battery_volts=battery_volts,
         )
@@ -130,6 +140,7 @@ def decode_frame(payload: bytes) -> DecodedTrapFrame | None:
         status=status,
         is_tripped=_decode_binary_status(status),
         trap_id=trap_id,
+        legacy_trap_ids=(trap_id,),
         battery_raw=battery_raw,
         battery_volts=battery_volts,
     )

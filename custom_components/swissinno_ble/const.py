@@ -30,12 +30,16 @@ def entity_unique_id(address: str, suffix: str | None = None) -> str:
     return f"{unique_id}_{suffix}" if suffix else unique_id
 
 
-def legacy_unique_ids(trap_id: str, suffix: str | None = None) -> tuple[str, ...]:
+def legacy_unique_ids(
+    trap_ids: str | tuple[str, ...], suffix: str | None = None
+) -> tuple[str, ...]:
     """Return payload-based unique IDs used before version 1.0.16."""
-    identifiers = [f"swissinno_trap_{trap_id}"]
-    lowercase_identifier = f"swissinno_trap_{trap_id.lower()}"
-    if lowercase_identifier not in identifiers:
-        identifiers.append(lowercase_identifier)
+    identifiers: list[str] = []
+    for trap_id in (trap_ids,) if isinstance(trap_ids, str) else trap_ids:
+        for value in (trap_id, trap_id.lower()):
+            identifier = f"swissinno_trap_{value}"
+            if identifier not in identifiers:
+                identifiers.append(identifier)
     if suffix:
         return tuple(f"{identifier}_{suffix}" for identifier in identifiers)
     return tuple(identifiers)

@@ -32,7 +32,7 @@ async def async_setup_entry(
         *,
         rssi: int | None = None,
         battery_v: float | None = None,
-        legacy_trap_id: str | None = None,
+        legacy_trap_ids: tuple[str, ...] | None = None,
         available: bool,
     ) -> None:
         if not available:
@@ -53,7 +53,7 @@ async def async_setup_entry(
                 _migrate_legacy_unique_id(
                     entity_registry,
                     "sensor",
-                    legacy_trap_id,
+                    legacy_trap_ids,
                     "battery",
                     entity_unique_id(trap_id, "battery"),
                 )
@@ -68,7 +68,7 @@ async def async_setup_entry(
             _migrate_legacy_unique_id(
                 entity_registry,
                 "sensor",
-                legacy_trap_id,
+                legacy_trap_ids,
                 "rssi",
                 entity_unique_id(trap_id, "rssi"),
             )
@@ -91,17 +91,17 @@ async def async_setup_entry(
 def _migrate_legacy_unique_id(
     entity_registry,
     platform: str,
-    legacy_trap_id: str | None,
+    legacy_trap_ids: tuple[str, ...] | None,
     suffix: str,
     unique_id: str,
 ) -> None:
     """Migrate a legacy payload-based unique ID when no duplicate exists."""
-    if legacy_trap_id is None or entity_registry.async_get_entity_id(
+    if legacy_trap_ids is None or entity_registry.async_get_entity_id(
         platform, DOMAIN, unique_id
     ):
         return
 
-    for legacy_unique_id in legacy_unique_ids(legacy_trap_id, suffix):
+    for legacy_unique_id in legacy_unique_ids(legacy_trap_ids, suffix):
         legacy_entity_id = entity_registry.async_get_entity_id(
             platform, DOMAIN, legacy_unique_id
         )

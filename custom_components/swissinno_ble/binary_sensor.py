@@ -52,7 +52,7 @@ async def async_setup_entry(
         # Preserve the user's existing entity_id when the MAC-based identity is
         # not already registered. Existing duplicate entities are left alone so
         # Home Assistant configuration is never destructively rewritten.
-        old_unique_ids = legacy_unique_ids(frame.trap_id)
+        old_unique_ids = legacy_unique_ids(frame.legacy_trap_ids)
         unique_id = entity_unique_id(service_info.address)
         if not entity_registry.async_get_entity_id(
             "binary_sensor", DOMAIN, unique_id
@@ -106,7 +106,7 @@ async def async_setup_entry(
                 trap_id,
                 rssi=rssi,
                 battery_v=frame.battery_volts,
-                legacy_trap_id=frame.trap_id,
+                legacy_trap_ids=frame.legacy_trap_ids,
                 available=True,
             )
 

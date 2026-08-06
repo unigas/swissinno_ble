@@ -12,7 +12,8 @@
 - Kept electronic high-voltage reset disabled while retaining reset for
   compatible Connect and legacy devices.
 - Centralized MAC-based entity unique IDs and added non-destructive migration
-  for legacy payload-based binary sensor, battery, RSSI, and reset IDs.
+  for legacy payload-based binary sensor, battery, RSSI, and reset IDs,
+  including the shorter Connect identity emitted by version 1.0.14.
 - Expanded protocol, identity migration, and troubleshooting documentation.
 
 ## 1.0.19

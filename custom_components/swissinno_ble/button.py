@@ -53,10 +53,11 @@ async def async_setup_entry(
 
         # Versions before 1.0.16 used changing advertisement bytes in the
         # reset button unique ID. Migrate the currently discoverable ID.
-        legacy_trap_id = frame.trap_id
         unique_id = entity_unique_id(address, "reset")
         if not entity_registry.async_get_entity_id("button", DOMAIN, unique_id):
-            for legacy_unique_id in legacy_unique_ids(legacy_trap_id, "reset"):
+            for legacy_unique_id in legacy_unique_ids(
+                frame.legacy_trap_ids, "reset"
+            ):
                 legacy_entity_id = entity_registry.async_get_entity_id(
                     "button", DOMAIN, legacy_unique_id
                 )
