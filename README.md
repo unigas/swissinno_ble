@@ -77,10 +77,31 @@ No YAML configuration is needed.
 When a trap is detected, the following entities are created automatically:
 
 ### Entities per trap:
-- `binary_sensor.swissinno_trap_<ID>` – **Trap triggered / ready**
-- `sensor.swissinno_battery_<ID>` – **Battery voltage**
-- `sensor.swissinno_rssi_<ID>` – **Bluetooth signal strength**
-- `button.swissinno_trap_<ID>_reset` – **Reset Trap** (supported Connect/legacy devices only)
+- `binary_sensor.swissinno_trap_<MAC>` – **Trap triggered / ready**
+- `sensor.swissinno_battery_<MAC>` – **Battery voltage**
+- `sensor.swissinno_rssi_<MAC>` – **Bluetooth signal strength**
+- `button.swissinno_trap_<MAC>_reset` – **Reset Trap** (supported Connect/legacy devices only)
+
+`<MAC>` is the Bluetooth address without separators, in lowercase. This makes
+the unique identity stable when advertisement counters or state bytes change.
+Upgrades migrate legacy payload-based unique IDs when possible and preserve the
+existing Home Assistant entity ID. If both an old and a MAC-based entity already
+exist, the integration leaves both registry entries untouched to avoid changing
+automations destructively; the unavailable legacy duplicate can then be removed
+manually after the MAC-based entity has been verified.
+
+## Advertisement status formats
+
+SWISSINNO devices use two observed 10-byte formats:
+
+| Family | Marker | Status field | Ready | Triggered |
+| --- | --- | --- | --- | --- |
+| Connect SuperCat | byte 6 = `0x01` | byte 0 | `0x00` | `0x01` |
+| Electronic SuperCat | byte 6 = `0x02` | byte 9 | `0x00` | `0x01` |
+
+For Connect frames, bytes 2–5 are the stable hardware ID. They are not a
+counter/status field. Unknown status values are reported as unknown instead of
+being guessed as ready or triggered.
 
 ---
 
@@ -105,10 +126,10 @@ trigger:
 action:
   - service: button.press
     target:
-      entity_id: button.swissinno_trap_DC140300_reset
+      entity_id: button.swissinno_trap_c8aedc738048_reset
 ```
 
-Replace `DC140300` with your own trap ID.
+Replace `c8aedc738048` with your trap's normalized Bluetooth address.
 
 ---
 
@@ -119,20 +140,20 @@ type: entities
 title: 🐀 SWISSINNO Trap — Kitchen
 show_header_toggle: false
 entities:
-  - entity: binary_sensor.swissinno_trap_DC140300
+  - entity: binary_sensor.swissinno_trap_c8aedc738048
     name: Trap Status
     state_color: true
     icon: mdi:rodent
 
   - type: custom:template-entity-row
-    entity: sensor.swissinno_battery_DC140300
+    entity: sensor.swissinno_battery_c8aedc738048
     name: Battery Level
     state: "{{ states('sensor.swissinno_battery_DC140300') | round(2) }} V"
 
-  - entity: sensor.swissinno_rssi_DC140300
+  - entity: sensor.swissinno_rssi_c8aedc738048
     name: Signal Strength
 
-  - entity: button.swissinno_trap_DC140300_reset
+  - entity: button.swissinno_trap_c8aedc738048_reset
     name: Reset Trap
 ```
 
@@ -156,6 +177,11 @@ Voltage = (raw * 3.6) / 255
 
 ### ❓ Trap state updates slowly?
 Move the trap closer to the receiver or use more BLE proxies.
+
+### ❓ The official app says ready but Home Assistant says problem?
+Version 1.0.20 fixes a Connect-frame decoder bug present in 1.0.19. Upgrade the
+integration and reload it before changing automations. With the `problem` device
+class, a ready trap is `off` and a triggered trap is `on`.
 
 ---
 

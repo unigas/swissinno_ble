@@ -12,12 +12,15 @@ from homeassistant.components.bluetooth import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity import DeviceInfo
 
 from .const import (
     ADVERTISEMENT_MATCHER,
     DOMAIN,
     MANUFACTURER_ID,
+    entity_unique_id,
+    legacy_unique_ids,
     normalized_address,
 )
 from .decoder import decode_frame
@@ -32,6 +35,7 @@ async def async_setup_entry(
     _LOGGER.info("SWISSINNO BLE: Registering Bluetooth scanner callback...")
 
     sensors: dict[str, SwissinnoTrapSensor] = {}
+    entity_registry = er.async_get(hass)
 
     @callback
     def detection_callback(service_info: BluetoothServiceInfoBleak, change):
@@ -47,9 +51,29 @@ async def async_setup_entry(
         trap_id = normalized_address(service_info.address)
         rssi = service_info.rssi
 
+        # Versions before 1.0.16 used manufacturer-data bytes in the unique ID.
+        # Preserve the user's existing entity_id when the MAC-based identity is
+        # not already registered. Existing duplicate entities are left alone so
+        # Home Assistant configuration is never destructively rewritten.
+        old_unique_ids = legacy_unique_ids(frame.trap_id)
+        unique_id = entity_unique_id(service_info.address)
+        if not entity_registry.async_get_entity_id(
+            "binary_sensor", DOMAIN, unique_id
+        ):
+            for legacy_unique_id in old_unique_ids:
+                legacy_entity_id = entity_registry.async_get_entity_id(
+                    "binary_sensor", DOMAIN, legacy_unique_id
+                )
+                if legacy_entity_id:
+                    entity_registry.async_update_entity(
+                        legacy_entity_id, new_unique_id=unique_id
+                    )
+                    break
+
         _LOGGER.debug(
-            "Trap %s: tripped=%s, RSSI=%s dBm, battery=%s V",
+            "Trap %s: status=0x%02X, tripped=%s, RSSI=%s dBm, battery=%s V",
             trap_id,
+            frame.status,
             frame.is_tripped,
             rssi,
             frame.battery_volts,
@@ -58,9 +82,7 @@ async def async_setup_entry(
         if trap_id in sensors:
             sensors[trap_id].update_state(frame.is_tripped)
         else:
-            entity = SwissinnoTrapSensor(
-                service_info.address, trap_id, frame.is_tripped
-            )
+            entity = SwissinnoTrapSensor(trap_id, frame.is_tripped)
             sensors[trap_id] = entity
             async_add_entities([entity], update_before_add=True)
 
@@ -87,6 +109,7 @@ async def async_setup_entry(
                 trap_id,
                 rssi=rssi,
                 battery_v=frame.battery_volts,
+                legacy_trap_id=frame.trap_id,
                 available=True,
             )
 
@@ -109,12 +132,12 @@ class SwissinnoTrapSensor(BinarySensorEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "trap_status"
 
-    def __init__(self, address: str, trap_id: str, tripped: bool):
+    def __init__(self, trap_id: str, tripped: bool | None):
         self._trap_id = trap_id
         self._state = tripped
         self._attr_available = True
 
-        self._attr_unique_id = f"swissinno_trap_{trap_id}"
+        self._attr_unique_id = entity_unique_id(trap_id)
 
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, trap_id)},
@@ -123,10 +146,10 @@ class SwissinnoTrapSensor(BinarySensorEntity):
         )
 
     @property
-    def is_on(self) -> bool:
+    def is_on(self) -> bool | None:
         return self._state
 
-    def update_state(self, tripped: bool):
+    def update_state(self, tripped: bool | None):
         self._state = tripped
         self._attr_available = True
         self.async_write_ha_state()

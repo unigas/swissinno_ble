@@ -7,9 +7,10 @@ from homeassistant.const import (
     UnitOfElectricPotential,
 )
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 
 from .battery import BatteryStabilizer
-from .const import DOMAIN
+from .const import DOMAIN, entity_unique_id, legacy_unique_ids
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,6 +24,7 @@ async def async_setup_entry(
     battery_sensors: dict[str, SwissinnoBatterySensor] = {}
     battery_stabilizers: dict[str, BatteryStabilizer] = {}
     rssi_sensors: dict[str, SwissinnoRSSISensor] = {}
+    entity_registry = er.async_get(hass)
 
     @callback
     def update_sensors(
@@ -30,6 +32,7 @@ async def async_setup_entry(
         *,
         rssi: int | None = None,
         battery_v: float | None = None,
+        legacy_trap_id: str | None = None,
         available: bool,
     ) -> None:
         if not available:
@@ -47,6 +50,13 @@ async def async_setup_entry(
             if trap_id in battery_sensors:
                 battery_sensors[trap_id].update_value(stable_battery_v)
             else:
+                _migrate_legacy_unique_id(
+                    entity_registry,
+                    "sensor",
+                    legacy_trap_id,
+                    "battery",
+                    entity_unique_id(trap_id, "battery"),
+                )
                 sensor = SwissinnoBatterySensor(trap_id, stable_battery_v)
                 battery_sensors[trap_id] = sensor
                 async_add_entities([sensor])
@@ -55,6 +65,13 @@ async def async_setup_entry(
         if trap_id in rssi_sensors:
             rssi_sensors[trap_id].update_value(rssi)
         else:
+            _migrate_legacy_unique_id(
+                entity_registry,
+                "sensor",
+                legacy_trap_id,
+                "rssi",
+                entity_unique_id(trap_id, "rssi"),
+            )
             sensor = SwissinnoRSSISensor(trap_id, rssi)
             rssi_sensors[trap_id] = sensor
             async_add_entities([sensor])
@@ -71,6 +88,30 @@ async def async_setup_entry(
     entry.async_on_unload(remove_updater)
 
 
+def _migrate_legacy_unique_id(
+    entity_registry,
+    platform: str,
+    legacy_trap_id: str | None,
+    suffix: str,
+    unique_id: str,
+) -> None:
+    """Migrate a legacy payload-based unique ID when no duplicate exists."""
+    if legacy_trap_id is None or entity_registry.async_get_entity_id(
+        platform, DOMAIN, unique_id
+    ):
+        return
+
+    for legacy_unique_id in legacy_unique_ids(legacy_trap_id, suffix):
+        legacy_entity_id = entity_registry.async_get_entity_id(
+            platform, DOMAIN, legacy_unique_id
+        )
+        if legacy_entity_id:
+            entity_registry.async_update_entity(
+                legacy_entity_id, new_unique_id=unique_id
+            )
+            return
+
+
 class SwissinnoBatterySensor(SensorEntity):
     """Battery voltage sensor."""
 
@@ -84,7 +125,7 @@ class SwissinnoBatterySensor(SensorEntity):
         self._value = battery_v
         self._attr_available = True
 
-        self._attr_unique_id = f"swissinno_trap_{trap_id}_battery"
+        self._attr_unique_id = entity_unique_id(trap_id, "battery")
         self._attr_native_value = battery_v
 
         self._attr_device_info = {
@@ -116,7 +157,7 @@ class SwissinnoRSSISensor(SensorEntity):
         self._value = rssi
         self._attr_available = True
 
-        self._attr_unique_id = f"swissinno_trap_{trap_id}_rssi"
+        self._attr_unique_id = entity_unique_id(trap_id, "rssi")
         self._attr_native_value = rssi
 
         self._attr_device_info = {
