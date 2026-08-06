@@ -13,7 +13,12 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity import DeviceInfo
 
-from .const import DOMAIN, MANUFACTURER_ID, normalized_address
+from .const import (
+    ADVERTISEMENT_MATCHER,
+    DOMAIN,
+    MANUFACTURER_ID,
+    normalized_address,
+)
 from .decoder import decode_frame
 from .reset import async_reset_trap
 
@@ -75,7 +80,7 @@ async def async_setup_entry(
     cancel = async_register_callback(
         hass,
         detection_callback,
-        {"manufacturer_id": MANUFACTURER_ID},
+        ADVERTISEMENT_MATCHER,
         BluetoothScanningMode.PASSIVE,
     )
 
