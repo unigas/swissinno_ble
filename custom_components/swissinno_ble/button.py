@@ -19,7 +19,7 @@ from .const import (
     MANUFACTURER_ID,
     normalized_address,
 )
-from .decoder import decode_frame
+from .decoder import decode_frame, supports_remote_reset
 from .reset import async_reset_trap
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ async def async_setup_entry(
             return
 
         payload = manufacturer_data[MANUFACTURER_ID]
-        if decode_frame(payload) is None:
+        if decode_frame(payload) is None or not supports_remote_reset(payload):
             return
 
         address = service_info.address

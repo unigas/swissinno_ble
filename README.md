@@ -1,8 +1,8 @@
 # 🐀 SWISSINNO BLE Trap Integration for Home Assistant
 
-A **custom Home Assistant integration** for the **SWISSINNO Connect SuperCat**, enabling real-time monitoring **and wireless control** of your mousetraps over Bluetooth Low Energy (BLE).
+A **custom Home Assistant integration** for **SWISSINNO Connect SuperCat and electronic SuperCat traps**, enabling real-time monitoring over Bluetooth Low Energy (BLE).
 
-This integration now supports **remote trap reset**, allowing you to reset a trap from *“Caught” → “Ready”* without touching it.
+Supported Connect/legacy devices also expose **remote trap reset**. Electronic high-voltage traps require a physical power cycle for safety, as documented by SWISSINNO, and therefore do not expose a reset button.
 
 ![image](https://github.com/user-attachments/assets/99f7ad4c-0344-4547-89e7-5c4329c465a4)
 
@@ -22,14 +22,14 @@ Detects traps instantly — no pairing or manual configuration required.
 Real-time detection of **triggered vs. ready** state.
 
 ### ✔️ Battery Voltage Sensor  
-Accurate battery readings with automatic updates.
+Accurate battery readings with automatic updates and transient-value filtering.
 
 ### ✔️ RSSI (Signal Strength) Sensor  
 Helps you place traps for optimal Bluetooth coverage.
 
-### ✔️ **NEW: Remote BLE Reset**  
-Each trap now exposes a **Reset Trap** button in Home Assistant.  
-Pressing it sends a BLE write command to clear the “caught” state via GATT.
+### ✔️ Remote BLE Reset
+Supported Connect/legacy traps expose a **Reset Trap** button in Home Assistant.
+Electronic high-voltage traps intentionally require switching off and on again.
 
 ### ✔️ Lovelace UI Support  
 Includes example cards with icons, states, and reset control.
@@ -80,13 +80,13 @@ When a trap is detected, the following entities are created automatically:
 - `binary_sensor.swissinno_trap_<ID>` – **Trap triggered / ready**
 - `sensor.swissinno_battery_<ID>` – **Battery voltage**
 - `sensor.swissinno_rssi_<ID>` – **Bluetooth signal strength**
-- `button.swissinno_trap_<ID>_reset` – **Reset Trap** (BLE GATT write)
+- `button.swissinno_trap_<ID>_reset` – **Reset Trap** (supported Connect/legacy devices only)
 
 ---
 
 # 🔘 Reset Trap (BLE Write Support)
 
-Each trap includes a **Reset Trap** button entity that resets the device using Bluetooth.
+Supported Connect/legacy devices include a **Reset Trap** button entity that resets the catch sensor using Bluetooth. SWISSINNO disables app reset on electronic high-voltage traps for safety, so the integration does not create a reset button for those devices.
 
 ### BLE Command Details
 - **Characteristic UUID:** `02ECC6CD-2B43-4DB5-96E6-EDE92CF8778D`  

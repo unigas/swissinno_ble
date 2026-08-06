@@ -46,6 +46,14 @@ class DecoderTests(unittest.TestCase):
         self.assertEqual(frame.battery_raw, 468)
         self.assertEqual(frame.battery_volts, 3.0)
 
+    def test_electronic_trap_does_not_offer_remote_reset(self):
+        payload = bytes.fromhex("40 00 68 07 07 00 02 D4 01 01")
+        self.assertFalse(decoder.supports_remote_reset(payload))
+
+    def test_connect_trap_offers_remote_reset(self):
+        payload = bytes.fromhex("00 3F CE 03 04 00 01 DA 03 00")
+        self.assertTrue(decoder.supports_remote_reset(payload))
+
     def test_newer_frame_with_empty_trap_id_is_rejected(self):
         frame = decoder.decode_frame(bytes.fromhex("10 00 00 00 00 00 02 D4 01 00"))
         self.assertIsNone(frame)
@@ -53,6 +61,7 @@ class DecoderTests(unittest.TestCase):
     def test_short_frame_is_rejected(self):
         self.assertIsNone(decoder.decode_frame(b"\x01"))
         self.assertIsNone(decoder.decode_frame(b"\x01\x02\x03\x04\x05"))
+        self.assertFalse(decoder.supports_remote_reset(b"\x01"))
 
     def test_legacy_frame(self):
         frame = decoder.decode_frame(bytes.fromhex("01 00 AA BB CC DD 00 FF"))

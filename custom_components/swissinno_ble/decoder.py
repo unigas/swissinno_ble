@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 NEW_FRAME_MIN_LEN = 10
-EXTENDED_FRAME_MARKER = 0x02
+ELECTRONIC_TRAP_MARKER = 0x02
 MANUFACTURER_ID = 3003
 
 
@@ -46,7 +46,7 @@ def decode_frame(payload: bytes) -> DecodedTrapFrame | None:
     # little-endian battery value, and byte 9 as the alarm state. Byte 0 varies
     # between observed ready/triggered advertisements, so it is not used as the
     # state indicator for this layout.
-    if len(payload) >= NEW_FRAME_MIN_LEN and payload[6] == EXTENDED_FRAME_MARKER:
+    if len(payload) >= NEW_FRAME_MIN_LEN and payload[6] == ELECTRONIC_TRAP_MARKER:
         trap_id_bytes = payload[2:6]
         if not any(trap_id_bytes):
             return None
@@ -124,4 +124,17 @@ def decode_frame(payload: bytes) -> DecodedTrapFrame | None:
         trap_id=trap_id,
         battery_raw=battery_raw,
         battery_volts=battery_volts,
+    )
+
+
+def supports_remote_reset(payload: bytes) -> bool:
+    """Return whether this trap family supports the documented app reset.
+
+    Electronic traps use marker 0x02 and intentionally require a physical
+    power cycle for safety. Connect SuperCat and legacy devices retain the
+    reset button.
+    """
+    return decode_frame(payload) is not None and not (
+        len(payload) >= NEW_FRAME_MIN_LEN
+        and payload[6] == ELECTRONIC_TRAP_MARKER
     )
