@@ -41,7 +41,19 @@ class MetadataTests(unittest.TestCase):
         spec.loader.exec_module(const)
         self.assertEqual(
             const.ADVERTISEMENT_MATCHER,
-            {"manufacturer_id": const.MANUFACTURER_ID, "connectable": False},
+            {
+                "manufacturer_id": const.MANUFACTURER_ID,
+                "service_uuid": const.SERVICE_UUID,
+                "connectable": False,
+            },
+        )
+        self.assertEqual(manifest["bluetooth"], [const.ADVERTISEMENT_MATCHER])
+        self.assertEqual(
+            const.CONNECTABLE_ADVERTISEMENT_MATCHER,
+            {
+                **const.ADVERTISEMENT_MATCHER,
+                "connectable": True,
+            },
         )
 
     def test_custom_integration_uses_translation_file_only(self):

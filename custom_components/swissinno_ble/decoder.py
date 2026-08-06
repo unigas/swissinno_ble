@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 NEW_FRAME_MIN_LEN = 10
+EXTENDED_FRAME_MARKER = 0x02
 MANUFACTURER_ID = 3003
 
 
@@ -25,15 +26,44 @@ def _battery_to_volts(raw: int | None) -> float | None:
     return round((raw * 3.6) / 255.0, 2)
 
 
+def _extended_battery_to_volts(raw: int) -> float:
+    """Convert the two-byte battery value used by newer traps to volts."""
+    return round(raw / 156.0, 2)
+
+
 def decode_frame(payload: bytes) -> DecodedTrapFrame | None:
     """Decode SWISSINNO BLE manufacturer payload.
 
-    Supports both:
-    - New 10-byte format (2024/2025 traps)
-    - Old format (legacy traps)
+    Supports:
+    - Extended 10-byte format with two-byte battery and trailing alarm state
+    - 2024/2025 10-byte format with one-byte battery
+    - Legacy format
     """
     if len(payload) < 6:
         return None
+
+    # Newer SuperCat traps use byte 6 as a layout marker, bytes 7-8 as a
+    # little-endian battery value, and byte 9 as the alarm state. Byte 0 varies
+    # between observed ready/triggered advertisements, so it is not used as the
+    # state indicator for this layout.
+    if len(payload) >= NEW_FRAME_MIN_LEN and payload[6] == EXTENDED_FRAME_MARKER:
+        trap_id_bytes = payload[2:6]
+        if not any(trap_id_bytes):
+            return None
+
+        status = payload[9]
+        battery_raw = int.from_bytes(payload[7:9], "little")
+
+        return DecodedTrapFrame(
+            version=payload[0],
+            device_type=payload[1],
+            event_counter=None,
+            status=status,
+            is_tripped=status == 0x01,
+            trap_id="".join(f"{byte:02X}" for byte in trap_id_bytes),
+            battery_raw=battery_raw,
+            battery_volts=_extended_battery_to_volts(battery_raw),
+        )
 
     # ----------------------------------------------------------------------
     # NEW FORMAT (10 bytes minimum)
@@ -46,7 +76,7 @@ def decode_frame(payload: bytes) -> DecodedTrapFrame | None:
         event_counter = payload[2] | (payload[3] << 8)
         status = payload[4]
 
-        # New traps treat statuses 1–3 as "tripped"
+        # New traps treat statuses 1-3 as "tripped"
         is_tripped = status in (0x01, 0x02, 0x03)
 
         # Frame-local ID retained for backwards compatibility. Entity identity

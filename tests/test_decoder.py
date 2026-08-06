@@ -28,6 +28,28 @@ class DecoderTests(unittest.TestCase):
         self.assertEqual(frame.event_counter, 0x03CE)
         self.assertEqual(frame.battery_volts, 3.08)
 
+    def test_newer_frame_ready(self):
+        frame = decoder.decode_frame(bytes.fromhex("10 00 68 07 07 00 02 D4 01 00"))
+        self.assertIsNotNone(frame)
+        self.assertFalse(frame.is_tripped)
+        self.assertEqual(frame.status, 0x00)
+        self.assertEqual(frame.trap_id, "68070700")
+        self.assertEqual(frame.battery_raw, 468)
+        self.assertEqual(frame.battery_volts, 3.0)
+
+    def test_newer_frame_triggered(self):
+        frame = decoder.decode_frame(bytes.fromhex("40 00 68 07 07 00 02 D4 01 01"))
+        self.assertIsNotNone(frame)
+        self.assertTrue(frame.is_tripped)
+        self.assertEqual(frame.status, 0x01)
+        self.assertEqual(frame.trap_id, "68070700")
+        self.assertEqual(frame.battery_raw, 468)
+        self.assertEqual(frame.battery_volts, 3.0)
+
+    def test_newer_frame_with_empty_trap_id_is_rejected(self):
+        frame = decoder.decode_frame(bytes.fromhex("10 00 00 00 00 00 02 D4 01 00"))
+        self.assertIsNone(frame)
+
     def test_short_frame_is_rejected(self):
         self.assertIsNone(decoder.decode_frame(b"\x01"))
         self.assertIsNone(decoder.decode_frame(b"\x01\x02\x03\x04\x05"))
