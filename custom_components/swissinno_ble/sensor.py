@@ -8,6 +8,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant, callback
 
+from .battery import BatteryStabilizer
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -20,6 +21,7 @@ async def async_setup_entry(
     _LOGGER.info("SWISSINNO BLE: Initializing battery + RSSI sensors")
 
     battery_sensors: dict[str, SwissinnoBatterySensor] = {}
+    battery_stabilizers: dict[str, BatteryStabilizer] = {}
     rssi_sensors: dict[str, SwissinnoRSSISensor] = {}
 
     @callback
@@ -37,13 +39,17 @@ async def async_setup_entry(
                 rssi_sensors[trap_id].set_unavailable()
             return
 
-        # Battery
-        if trap_id in battery_sensors:
-            battery_sensors[trap_id].update_value(battery_v)
-        else:
-            sensor = SwissinnoBatterySensor(trap_id, battery_v)
-            battery_sensors[trap_id] = sensor
-            async_add_entities([sensor])
+        # Battery readings can briefly be invalid during startup or switching.
+        # Keep the last published value until two consecutive readings agree.
+        stabilizer = battery_stabilizers.setdefault(trap_id, BatteryStabilizer())
+        stable_battery_v = stabilizer.update(battery_v)
+        if stable_battery_v is not None:
+            if trap_id in battery_sensors:
+                battery_sensors[trap_id].update_value(stable_battery_v)
+            else:
+                sensor = SwissinnoBatterySensor(trap_id, stable_battery_v)
+                battery_sensors[trap_id] = sensor
+                async_add_entities([sensor])
 
         # RSSI
         if trap_id in rssi_sensors:
