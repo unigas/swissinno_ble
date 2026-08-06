@@ -1,9 +1,6 @@
 import logging
 
-from homeassistant.components.binary_sensor import (
-    BinarySensorDeviceClass,
-    BinarySensorEntity,
-)
+from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.components.bluetooth import (
     BluetoothScanningMode,
     BluetoothServiceInfoBleak,
@@ -128,7 +125,6 @@ async def async_setup_entry(
 class SwissinnoTrapSensor(BinarySensorEntity):
     """Representation of a SWISSINNO BLE trap."""
 
-    _attr_device_class = BinarySensorDeviceClass.PROBLEM
     _attr_has_entity_name = True
     _attr_translation_key = "trap_status"
 

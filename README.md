@@ -178,10 +178,16 @@ Voltage = (raw * 3.6) / 255
 ### ❓ Trap state updates slowly?
 Move the trap closer to the receiver or use more BLE proxies.
 
-### ❓ The official app says ready but Home Assistant says problem?
+### ❓ The official app says ready but Home Assistant says caught?
 Version 1.0.20 fixes a Connect-frame decoder bug present in 1.0.19. Upgrade the
-integration and reload it before changing automations. With the `problem` device
-class, a ready trap is `off` and a triggered trap is `on`.
+integration and reload it before changing automations. Home Assistant displays
+the states as **Ready/Caught** (localized in the supported languages); their
+automation values remain `off`/`on`.
+
+If old payload-based and new MAC-based entities were both created before the
+upgrade, Home Assistant can show more devices than physically exist. Verify the
+MAC-based entities first, update any automations that still use old entity IDs,
+then remove only the unavailable legacy duplicates from Home Assistant.
 
 ---
 

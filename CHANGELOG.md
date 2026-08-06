@@ -4,6 +4,8 @@
 
 - Fixed Connect SuperCat status decoding: byte 0 is the ready/triggered flag;
   byte 4 is part of the stable hardware ID and must not determine state.
+- Replaced the misleading Problem/OK presentation with localized Caught/Ready
+  labels while preserving the `on`/`off` states used by automations.
 - Added regression coverage for status-like ID bytes (`idle`, `armed`,
   `triggered`, `kill`, and `ready`), actual Connect ready/triggered frames,
   electronic frames, legacy frames, and unknown statuses.

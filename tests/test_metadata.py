@@ -65,13 +65,29 @@ class MetadataTests(unittest.TestCase):
         self.assertIn("entity", translations)
         self.assertFalse((INTEGRATION / "strings.json").exists())
 
-    def test_problem_binary_sensor_uses_decoder_state_directly(self):
+    def test_trap_binary_sensor_uses_translated_state_directly(self):
         source = (INTEGRATION / "binary_sensor.py").read_text(encoding="utf-8")
-        self.assertIn(
-            "_attr_device_class = BinarySensorDeviceClass.PROBLEM", source
-        )
+        self.assertNotIn("_attr_device_class", source)
         self.assertIn("def is_on(self) -> bool | None:", source)
         self.assertIn("return self._state", source)
+
+        expected_states = {
+            "de": {"off": "Bereit", "on": "Gefangen"},
+            "en": {"off": "Ready", "on": "Caught"},
+            "fr": {"off": "Prêt", "on": "Capturé"},
+            "it": {"off": "Pronta", "on": "Catturato"},
+            "sv": {"off": "Redo", "on": "Fångad"},
+        }
+        for language, states in expected_states.items():
+            translations = json.loads(
+                (INTEGRATION / "translations" / f"{language}.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            self.assertEqual(
+                translations["entity"]["binary_sensor"]["trap_status"]["state"],
+                states,
+            )
 
 
 if __name__ == "__main__":
