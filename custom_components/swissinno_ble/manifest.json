@@ -3,7 +3,7 @@
   "name": "SWISSINNO BLE Trap Sensors",
   "version": "1.0.15",
   "documentation": "https://github.com/unigas/swissinno_ble",
-  "dependencies": ["bluetooth"],
+  "dependencies": ["bluetooth", "bluetooth_adapters"],
   "codeowners": ["@unigas"],
   "iot_class": "local_push",
   "requirements": [],
