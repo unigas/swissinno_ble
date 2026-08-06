@@ -29,9 +29,7 @@ async def async_reset_trap(hass, address: str) -> None:
     )
 
     try:
-        characteristic = client.services.get_characteristic(
-            RESET_CHARACTERISTIC_UUID
-        )
+        characteristic = client.services.get_characteristic(RESET_CHARACTERISTIC_UUID)
         if characteristic is None:
             raise RuntimeError(
                 f"Reset characteristic {RESET_CHARACTERISTIC_UUID} not found"

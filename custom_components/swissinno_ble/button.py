@@ -2,44 +2,52 @@
 
 import logging
 
-from homeassistant.components.bluetooth import async_register_callback, BluetoothScanningMode
+from homeassistant.components.bluetooth import (
+    BluetoothScanningMode,
+    BluetoothServiceInfoBleak,
+    async_register_callback,
+)
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
 
-from .const import DOMAIN
+from .const import DOMAIN, MANUFACTURER_ID, normalized_address
+from .decoder import decode_frame
 from .reset import async_reset_trap
 
 _LOGGER = logging.getLogger(__name__)
 
-SWISSINNO_MANUFACTURER_ID = 3003
 
-
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities
+):
     """Set up Reset Trap buttons."""
     _LOGGER.info("SWISSINNO BLE: Setting up Reset Trap buttons")
 
     buttons = {}
 
     @callback
-    def detection_callback(service_info, change):
+    def detection_callback(service_info: BluetoothServiceInfoBleak, change):
         manufacturer_data = service_info.manufacturer_data
 
-        if SWISSINNO_MANUFACTURER_ID not in manufacturer_data:
+        if MANUFACTURER_ID not in manufacturer_data:
             return
 
-        data = manufacturer_data[SWISSINNO_MANUFACTURER_ID]
-        if len(data) < 6:
+        if decode_frame(manufacturer_data[MANUFACTURER_ID]) is None:
             return
 
-        trap_id = f"{data[2]:02X}{data[3]:02X}{data[4]:02X}{data[5]:02X}"
+        address = service_info.address
+        trap_id = normalized_address(address)
 
         if trap_id in buttons:
             return
 
-        address = service_info.address
-        _LOGGER.info("SWISSINNO BLE: Adding Reset Trap button for %s (%s)", trap_id, address)
+        _LOGGER.info(
+            "SWISSINNO BLE: Adding Reset Trap button for %s (%s)",
+            trap_id,
+            address,
+        )
 
         button = SwissinnoResetButton(hass, address, trap_id)
         buttons[trap_id] = button
@@ -49,11 +57,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     cancel = async_register_callback(
         hass,
         detection_callback,
-        {},
+        {"manufacturer_id": MANUFACTURER_ID},
         BluetoothScanningMode.PASSIVE,
     )
 
-    hass.bus.async_listen_once("homeassistant_stop", cancel)
+    entry.async_on_unload(cancel)
 
 
 class SwissinnoResetButton(ButtonEntity):
@@ -71,11 +79,11 @@ class SwissinnoResetButton(ButtonEntity):
         self._attr_icon = "mdi:restart"
 
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, address)},
+            identifiers={(DOMAIN, trap_id)},
             name=f"SWISSINNO Trap {trap_id}",
             manufacturer="SWISSINNO",
             model="BLE Trap",
         )
 
-    async def async_press(self):
+    async def async_press(self) -> None:
         await async_reset_trap(self._hass, self._address)
