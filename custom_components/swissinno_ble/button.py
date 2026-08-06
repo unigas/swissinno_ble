@@ -10,6 +10,7 @@ from homeassistant.components.bluetooth import (
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity import DeviceInfo
 
 from .const import DOMAIN, MANUFACTURER_ID, normalized_address
@@ -26,6 +27,7 @@ async def async_setup_entry(
     _LOGGER.info("SWISSINNO BLE: Setting up Reset Trap buttons")
 
     buttons = {}
+    entity_registry = er.async_get(hass)
 
     @callback
     def detection_callback(service_info: BluetoothServiceInfoBleak, change):
@@ -34,11 +36,27 @@ async def async_setup_entry(
         if MANUFACTURER_ID not in manufacturer_data:
             return
 
-        if decode_frame(manufacturer_data[MANUFACTURER_ID]) is None:
+        payload = manufacturer_data[MANUFACTURER_ID]
+        if decode_frame(payload) is None:
             return
 
         address = service_info.address
         trap_id = normalized_address(address)
+
+        # Versions before 1.0.16 used changing advertisement bytes in the
+        # reset button unique ID. Migrate the currently discoverable ID.
+        legacy_trap_id = "".join(f"{byte:02X}" for byte in payload[2:6])
+        legacy_unique_id = f"swissinno_trap_{legacy_trap_id}_reset"
+        unique_id = f"swissinno_trap_{trap_id}_reset"
+        legacy_entity_id = entity_registry.async_get_entity_id(
+            "button", DOMAIN, legacy_unique_id
+        )
+        if legacy_entity_id and not entity_registry.async_get_entity_id(
+            "button", DOMAIN, unique_id
+        ):
+            entity_registry.async_update_entity(
+                legacy_entity_id, new_unique_id=unique_id
+            )
 
         if trap_id in buttons:
             return
@@ -68,6 +86,7 @@ class SwissinnoResetButton(ButtonEntity):
     """Button to reset a SWISSINNO trap."""
 
     _attr_has_entity_name = True
+    _attr_translation_key = "reset_trap"
 
     def __init__(self, hass: HomeAssistant, address: str, trap_id: str):
         self._hass = hass
@@ -75,7 +94,6 @@ class SwissinnoResetButton(ButtonEntity):
         self._trap_id = trap_id
 
         self._attr_unique_id = f"swissinno_trap_{trap_id}_reset"
-        self._attr_name = "Reset Trap"
         self._attr_icon = "mdi:restart"
 
         self._attr_device_info = DeviceInfo(

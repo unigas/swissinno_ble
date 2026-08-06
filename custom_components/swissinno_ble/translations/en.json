@@ -13,5 +13,25 @@
         }
       }
     }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Status"
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Reset trap"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Battery voltage"
+      },
+      "signal_strength": {
+        "name": "Signal strength"
+      }
+    }
   }
 }

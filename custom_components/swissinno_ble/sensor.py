@@ -69,14 +69,15 @@ class SwissinnoBatterySensor(SensorEntity):
     """Battery voltage sensor."""
 
     _attr_device_class = SensorDeviceClass.VOLTAGE
+    _attr_has_entity_name = True
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
+    _attr_translation_key = "battery_voltage"
 
     def __init__(self, trap_id: str, battery_v: float | None):
         self._trap_id = trap_id
         self._value = battery_v
         self._attr_available = True
 
-        self._attr_name = f"SWISSINNO Trap {trap_id} Battery"
         self._attr_unique_id = f"swissinno_trap_{trap_id}_battery"
         self._attr_native_value = battery_v
 
@@ -100,14 +101,15 @@ class SwissinnoBatterySensor(SensorEntity):
 class SwissinnoRSSISensor(SensorEntity):
     """RSSI sensor."""
 
+    _attr_has_entity_name = True
     _attr_native_unit_of_measurement = SIGNAL_STRENGTH_DECIBELS_MILLIWATT
+    _attr_translation_key = "signal_strength"
 
     def __init__(self, trap_id: str, rssi: int | None):
         self._trap_id = trap_id
         self._value = rssi
         self._attr_available = True
 
-        self._attr_name = f"SWISSINNO Trap {trap_id} RSSI"
         self._attr_unique_id = f"swissinno_trap_{trap_id}_rssi"
         self._attr_native_value = rssi
 
