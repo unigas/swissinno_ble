@@ -14,7 +14,7 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity import DeviceInfo
 
 from .const import (
-    ADVERTISEMENT_MATCHER,
+    CONNECTABLE_ADVERTISEMENT_MATCHER,
     DOMAIN,
     MANUFACTURER_ID,
     normalized_address,
@@ -80,7 +80,7 @@ async def async_setup_entry(
     cancel = async_register_callback(
         hass,
         detection_callback,
-        ADVERTISEMENT_MATCHER,
+        CONNECTABLE_ADVERTISEMENT_MATCHER,
         BluetoothScanningMode.PASSIVE,
     )
 

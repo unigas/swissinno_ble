@@ -2,9 +2,9 @@
   "domain": "swissinno_ble",
   "name": "SWISSINNO BLE Trap Sensors",
   "bluetooth": [
-    { "connectable": false, "manufacturer_id": 3003 },
     {
       "connectable": false,
+      "manufacturer_id": 3003,
       "service_uuid": "0000fcd6-0000-1000-8000-00805f9b34fb"
     }
   ],
@@ -17,5 +17,5 @@
   "issue_tracker": "https://github.com/unigas/swissinno_ble/issues",
   "requirements": [],
   "single_config_entry": true,
-  "version": "1.0.17"
+  "version": "1.0.18"
 }
