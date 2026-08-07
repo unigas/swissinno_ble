@@ -108,6 +108,7 @@ class SwissinnoBatterySensor(SensorEntity):
     _attr_has_entity_name = True
     _attr_icon = "mdi:battery"
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
+    _attr_suggested_display_precision = 2
     _attr_translation_key = "battery_voltage"
 
     def __init__(self, trap_id: str, battery_v: float | None):
