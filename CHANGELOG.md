@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.23
+
+- Suggested two decimal places for battery voltage so Home Assistant displays
+  readings such as 2.37 V instead of rounding them to 2 V.
+
 ## 1.0.22
 
 - Restored the explicit rodent icon for trap status.
