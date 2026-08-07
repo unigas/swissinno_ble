@@ -1,0 +1,41 @@
+{
+  "title": "Czujniki pułapek SWISSINNO BLE",
+  "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE jest już skonfigurowana."
+    },
+    "step": {
+      "user": {
+        "title": "Konfiguracja SWISSINNO BLE",
+        "description": "Automatycznie wykrywa wszystkie pułapki Bluetooth SWISSINNO.",
+        "data": {
+          "device_name": "Nazwa integracji"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Stan",
+        "state": {
+          "off": "Gotowa",
+          "on": "Złapano"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Zresetuj pułapkę"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Napięcie baterii"
+      },
+      "signal_strength": {
+        "name": "Siła sygnału"
+      }
+    }
+  }
+}

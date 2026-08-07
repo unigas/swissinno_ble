@@ -1,0 +1,41 @@
+{
+  "title": "SWISSINNO BLE-fældesensorer",
+  "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE er allerede konfigureret."
+    },
+    "step": {
+      "user": {
+        "title": "Konfigurer SWISSINNO BLE",
+        "description": "Registrerer automatisk alle SWISSINNO Bluetooth-fælder.",
+        "data": {
+          "device_name": "Integrationsnavn"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Status",
+        "state": {
+          "off": "Klar",
+          "on": "Fanget"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Nulstil fælde"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Batterispænding"
+      },
+      "signal_strength": {
+        "name": "Signalstyrke"
+      }
+    }
+  }
+}

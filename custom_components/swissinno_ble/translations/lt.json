@@ -1,0 +1,41 @@
+{
+  "title": "SWISSINNO BLE spąstų jutikliai",
+  "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE jau sukonfigūruota."
+    },
+    "step": {
+      "user": {
+        "title": "SWISSINNO BLE sąranka",
+        "description": "Automatiškai aptinka visus SWISSINNO Bluetooth spąstus.",
+        "data": {
+          "device_name": "Integracijos pavadinimas"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Būsena",
+        "state": {
+          "off": "Paruošta",
+          "on": "Sugauta"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Atstatyti spąstus"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Akumuliatoriaus įtampa"
+      },
+      "signal_strength": {
+        "name": "Signalo stiprumas"
+      }
+    }
+  }
+}

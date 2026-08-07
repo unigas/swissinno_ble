@@ -1,0 +1,41 @@
+{
+  "title": "SWISSINNO BLE -loukkutunnistimet",
+  "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE on jo määritetty."
+    },
+    "step": {
+      "user": {
+        "title": "SWISSINNO BLE:n määritys",
+        "description": "Tunnistaa automaattisesti kaikki SWISSINNO Bluetooth -loukut.",
+        "data": {
+          "device_name": "Integraation nimi"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Tila",
+        "state": {
+          "off": "Valmis",
+          "on": "Saalis"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Nollaa loukku"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Pariston jännite"
+      },
+      "signal_strength": {
+        "name": "Signaalin voimakkuus"
+      }
+    }
+  }
+}
