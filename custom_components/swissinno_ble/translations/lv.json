@@ -1,0 +1,41 @@
+{
+  "title": "SWISSINNO BLE slazdu sensori",
+  "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE jau ir konfigurēta."
+    },
+    "step": {
+      "user": {
+        "title": "SWISSINNO BLE iestatīšana",
+        "description": "Automātiski nosaka visus SWISSINNO Bluetooth slazdus.",
+        "data": {
+          "device_name": "Integrācijas nosaukums"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Statuss",
+        "state": {
+          "off": "Gatavs",
+          "on": "Noķerts"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Atiestatīt slazdu"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Akumulatora spriegums"
+      },
+      "signal_strength": {
+        "name": "Signāla stiprums"
+      }
+    }
+  }
+}

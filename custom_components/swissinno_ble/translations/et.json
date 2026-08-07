@@ -1,0 +1,41 @@
+{
+  "title": "SWISSINNO BLE lõksuandurid",
+  "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE on juba seadistatud."
+    },
+    "step": {
+      "user": {
+        "title": "SWISSINNO BLE seadistamine",
+        "description": "Tuvastab automaatselt kõik SWISSINNO Bluetooth-lõksud.",
+        "data": {
+          "device_name": "Integratsiooni nimi"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Olek",
+        "state": {
+          "off": "Valmis",
+          "on": "Püütud"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Lähtesta lõks"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Aku pinge"
+      },
+      "signal_strength": {
+        "name": "Signaali tugevus"
+      }
+    }
+  }
+}

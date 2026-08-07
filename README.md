@@ -19,7 +19,7 @@ If you like this integration please consider:
 Detects traps instantly — no pairing or manual configuration required.
 
 ### ✔️ Trap Status Monitoring  
-Real-time detection of **triggered vs. ready** state.
+Real-time detection of **caught vs. ready** state.
 
 ### ✔️ Battery Voltage Sensor  
 Accurate battery readings with automatic updates and transient-value filtering.
@@ -36,6 +36,11 @@ Includes example cards with icons, states, and reset control.
 
 ### ✔️ Fully Plug-and-Play  
 No YAML needed. Everything is auto-discovered.
+
+### ✔️ Localized UI
+Setup, entity names, and Ready/Caught states are available in English, German,
+French, Italian, Swedish, Norwegian Bokmål, Danish, Finnish, Icelandic,
+Estonian, Latvian, Lithuanian, Polish, and Ukrainian.
 
 ---
 
@@ -73,28 +78,42 @@ The integration will immediately begin scanning for nearby traps.
 
 # ⚙️ Configuration
 
-No YAML configuration is needed.  
-When a trap is detected, the following entities are created automatically:
+No YAML configuration is needed.
+When a trap is detected, Home Assistant creates a **Ready/Caught status**,
+**battery voltage**, **Bluetooth signal strength**, and, for supported
+Connect/legacy devices, a **Reset Trap** button.
 
-### Entities per trap:
-- `binary_sensor.swissinno_trap_<MAC>` – **Trap triggered / ready**
-- `sensor.swissinno_battery_<MAC>` – **Battery voltage**
-- `sensor.swissinno_rssi_<MAC>` – **Bluetooth signal strength**
-- `button.swissinno_trap_<MAC>_reset` – **Reset Trap** (supported Connect/legacy devices only)
+The integration uses the following stable unique IDs internally:
+
+| Entity | Unique ID |
+| --- | --- |
+| Status | `swissinno_trap_<MAC>` |
+| Battery voltage | `swissinno_trap_<MAC>_battery` |
+| Signal strength | `swissinno_trap_<MAC>_rssi` |
+| Reset button | `swissinno_trap_<MAC>_reset` |
 
 `<MAC>` is the Bluetooth address without separators, in lowercase. This makes
 the unique identity stable when advertisement counters or state bytes change.
 Upgrades migrate legacy payload-based unique IDs when possible and preserve the
-existing Home Assistant entity ID. If both an old and a MAC-based entity already
-exist, the integration leaves both registry entries untouched to avoid changing
-automations destructively; the unavailable legacy duplicate can then be removed
-manually after the MAC-based entity has been verified.
+existing Home Assistant entity ID. The visible `entity_id` can therefore differ
+from the internal unique ID, especially after an upgrade or a manual rename.
+Always copy the actual entity ID from Home Assistant when creating automations.
+If both an old and a MAC-based entity already exist, the integration leaves both
+registry entries untouched to avoid changing automations destructively; the
+unavailable legacy duplicate can then be removed manually after the MAC-based
+entity has been verified.
+
+Home Assistant translates new entity names using the system/backend language at
+the time each entity is created. Changing only a user's interface language does
+not rename existing entities; their display names can be edited safely without
+changing entity IDs or automations. See Home Assistant's
+[entity naming documentation](https://developers.home-assistant.io/docs/core/entity/#entity-naming).
 
 ## Advertisement status formats
 
 SWISSINNO devices use two observed 10-byte formats:
 
-| Family | Marker | Status field | Ready | Triggered |
+| Family | Marker | Status field | Ready (`off`) | Caught (`on`) |
 | --- | --- | --- | --- | --- |
 | Connect SuperCat | byte 6 = `0x01` | byte 0 | `0x00` | `0x01` |
 | Electronic SuperCat | byte 6 = `0x02` | byte 9 | `0x00` | `0x01` |
@@ -126,10 +145,11 @@ trigger:
 action:
   - service: button.press
     target:
-      entity_id: button.swissinno_trap_c8aedc738048_reset
+      entity_id: button.your_trap_reset
 ```
 
-Replace `c8aedc738048` with your trap's normalized Bluetooth address.
+Replace `button.your_trap_reset` with the actual reset-button entity ID shown by
+Home Assistant.
 
 ---
 
@@ -140,24 +160,24 @@ type: entities
 title: 🐀 SWISSINNO Trap — Kitchen
 show_header_toggle: false
 entities:
-  - entity: binary_sensor.swissinno_trap_c8aedc738048
+  - entity: binary_sensor.your_trap_status
     name: Trap Status
     state_color: true
     icon: mdi:rodent
 
-  - type: custom:template-entity-row
-    entity: sensor.swissinno_battery_c8aedc738048
+  - entity: sensor.your_trap_battery_voltage
     name: Battery Level
-    state: "{{ states('sensor.swissinno_battery_DC140300') | round(2) }} V"
 
-  - entity: sensor.swissinno_rssi_c8aedc738048
+  - entity: sensor.your_trap_signal_strength
     name: Signal Strength
 
-  - entity: button.swissinno_trap_c8aedc738048_reset
+  - entity: button.your_trap_reset
     name: Reset Trap
 ```
 
-💡 Tip: Install **Lovelace Template Entity Row** via HACS.
+Replace the placeholder entity IDs with the actual IDs shown by Home Assistant.
+No custom Lovelace card is required; battery voltage suggests two decimal places
+from version 1.0.23 onward.
 
 ---
 
@@ -169,11 +189,20 @@ entities:
 - Try restarting Home Assistant  
 
 ### ❓ Wrong battery level?
-Correct conversion formula:
+Connect/legacy traps use a one-byte battery value:
 
 ```
 Voltage = (raw * 3.6) / 255
 ```
+
+Electronic traps use a two-byte little-endian value:
+
+```
+Voltage = raw / 156
+```
+
+Version 1.0.23 and later suggest two decimal places, so a decoded reading such
+as 2.37 V is no longer normally displayed as 2 V.
 
 ### ❓ Trap state updates slowly?
 Move the trap closer to the receiver or use more BLE proxies.
@@ -210,13 +239,6 @@ Contributions are welcome!
 # 📜 License
 
 **MIT License** — free to modify and redistribute.
-
----
-
-# 🧭 Roadmap
-
-✔️ BLE Trap Reset Support (v1.0.12)  
-
 
 ---
 

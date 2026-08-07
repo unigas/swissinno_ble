@@ -22,7 +22,7 @@ class MetadataTests(unittest.TestCase):
         self.assertTrue(manifest["config_flow"])
         self.assertTrue(manifest["single_config_entry"])
         self.assertEqual(manifest["integration_type"], "hub")
-        self.assertEqual(manifest["version"], "1.0.23")
+        self.assertEqual(manifest["version"], "1.0.24")
         self.assertIn("issue_tracker", manifest)
         self.assertIn("bluetooth_adapters", manifest["dependencies"])
         self.assertTrue((ROOT / "CHANGELOG.md").exists())
@@ -72,11 +72,20 @@ class MetadataTests(unittest.TestCase):
         self.assertIn("return self._state", source)
 
         expected_states = {
+            "da": {"off": "Klar", "on": "Fanget"},
             "de": {"off": "Bereit", "on": "Gefangen"},
             "en": {"off": "Ready", "on": "Caught"},
+            "et": {"off": "Valmis", "on": "Püütud"},
+            "fi": {"off": "Valmis", "on": "Saalis"},
             "fr": {"off": "Prêt", "on": "Capturé"},
+            "is": {"off": "Tilbúin", "on": "Fangað"},
             "it": {"off": "Pronta", "on": "Catturato"},
+            "lt": {"off": "Paruošta", "on": "Sugauta"},
+            "lv": {"off": "Gatavs", "on": "Noķerts"},
+            "nb": {"off": "Klar", "on": "Fanget"},
+            "pl": {"off": "Gotowa", "on": "Złapano"},
             "sv": {"off": "Redo", "on": "Fångad"},
+            "uk": {"off": "Готова", "on": "Спіймано"},
         }
         for language, states in expected_states.items():
             translations = json.loads(
@@ -88,6 +97,32 @@ class MetadataTests(unittest.TestCase):
                 translations["entity"]["binary_sensor"]["trap_status"]["state"],
                 states,
             )
+
+        translation_dir = INTEGRATION / "translations"
+        self.assertEqual(
+            {path.stem for path in translation_dir.glob("*.json")},
+            set(expected_states),
+        )
+
+        def flatten_keys(value, prefix=""):
+            keys = set()
+            for key, child in value.items():
+                path = f"{prefix}.{key}" if prefix else key
+                if isinstance(child, dict):
+                    keys.update(flatten_keys(child, path))
+                else:
+                    keys.add(path)
+            return keys
+
+        english = json.loads(
+            (translation_dir / "en.json").read_text(encoding="utf-8")
+        )
+        expected_keys = flatten_keys(english)
+        for language in expected_states:
+            translations = json.loads(
+                (translation_dir / f"{language}.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(flatten_keys(translations), expected_keys, language)
 
     def test_sensor_platform_replays_late_observations(self):
         binary_source = (INTEGRATION / "binary_sensor.py").read_text(

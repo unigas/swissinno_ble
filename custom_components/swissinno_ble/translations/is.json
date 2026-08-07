@@ -1,0 +1,41 @@
+{
+  "title": "SWISSINNO BLE-gildruskynjarar",
+  "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE er þegar stillt."
+    },
+    "step": {
+      "user": {
+        "title": "Uppsetning SWISSINNO BLE",
+        "description": "Finnur sjálfkrafa allar SWISSINNO Bluetooth-gildrur.",
+        "data": {
+          "device_name": "Heiti samþættingar"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Staða",
+        "state": {
+          "off": "Tilbúin",
+          "on": "Fangað"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Endurstilla gildru"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Rafhlöðuspenna"
+      },
+      "signal_strength": {
+        "name": "Merkisstyrkur"
+      }
+    }
+  }
+}

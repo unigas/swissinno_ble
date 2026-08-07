@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.24
+
+- Added complete Norwegian Bokmål, Danish, Finnish, Icelandic, Estonian,
+  Latvian, Lithuanian, Polish, and Ukrainian translations.
+- Documented all supported languages and Home Assistant's entity-name language
+  behavior.
+- Corrected stale entity examples and documented the separate battery formulas
+  used by Connect/legacy and electronic traps.
+
 ## 1.0.23
 
 - Suggested two decimal places for battery voltage so Home Assistant displays

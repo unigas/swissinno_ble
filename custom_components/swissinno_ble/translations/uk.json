@@ -1,0 +1,41 @@
+{
+  "title": "Датчики пасток SWISSINNO BLE",
+  "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE уже налаштовано."
+    },
+    "step": {
+      "user": {
+        "title": "Налаштування SWISSINNO BLE",
+        "description": "Автоматично виявляє всі Bluetooth-пастки SWISSINNO.",
+        "data": {
+          "device_name": "Назва інтеграції"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Стан",
+        "state": {
+          "off": "Готова",
+          "on": "Спіймано"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Скинути пастку"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Напруга батареї"
+      },
+      "signal_strength": {
+        "name": "Рівень сигналу"
+      }
+    }
+  }
+}
