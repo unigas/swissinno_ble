@@ -10,7 +10,8 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import entity_registry as er
 
 from .battery import BatteryStabilizer
-from .const import DOMAIN, entity_unique_id, legacy_unique_ids
+from .const import DATA_COORDINATOR, DOMAIN, entity_unique_id, legacy_unique_ids
+from .coordinator import TrapObservation, TrapObservationCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -25,17 +26,14 @@ async def async_setup_entry(
     battery_stabilizers: dict[str, BatteryStabilizer] = {}
     rssi_sensors: dict[str, SwissinnoRSSISensor] = {}
     entity_registry = er.async_get(hass)
+    coordinator: TrapObservationCoordinator = hass.data[DOMAIN][DATA_COORDINATOR]
 
     @callback
     def update_sensors(
         trap_id: str,
-        *,
-        rssi: int | None = None,
-        battery_v: float | None = None,
-        legacy_trap_ids: tuple[str, ...] | None = None,
-        available: bool,
+        observation: TrapObservation,
     ) -> None:
-        if not available:
+        if not observation.available:
             if trap_id in battery_sensors:
                 battery_sensors[trap_id].set_unavailable()
             if trap_id in rssi_sensors:
@@ -45,7 +43,7 @@ async def async_setup_entry(
         # Battery readings can briefly be invalid during startup or switching.
         # Keep the last published value until two consecutive readings agree.
         stabilizer = battery_stabilizers.setdefault(trap_id, BatteryStabilizer())
-        stable_battery_v = stabilizer.update(battery_v)
+        stable_battery_v = stabilizer.update(observation.battery_v)
         if stable_battery_v is not None:
             if trap_id in battery_sensors:
                 battery_sensors[trap_id].update_value(stable_battery_v)
@@ -53,7 +51,7 @@ async def async_setup_entry(
                 _migrate_legacy_unique_id(
                     entity_registry,
                     "sensor",
-                    legacy_trap_ids,
+                    observation.legacy_trap_ids,
                     "battery",
                     entity_unique_id(trap_id, "battery"),
                 )
@@ -63,29 +61,20 @@ async def async_setup_entry(
 
         # RSSI
         if trap_id in rssi_sensors:
-            rssi_sensors[trap_id].update_value(rssi)
+            rssi_sensors[trap_id].update_value(observation.rssi)
         else:
             _migrate_legacy_unique_id(
                 entity_registry,
                 "sensor",
-                legacy_trap_ids,
+                observation.legacy_trap_ids,
                 "rssi",
                 entity_unique_id(trap_id, "rssi"),
             )
-            sensor = SwissinnoRSSISensor(trap_id, rssi)
+            sensor = SwissinnoRSSISensor(trap_id, observation.rssi)
             rssi_sensors[trap_id] = sensor
             async_add_entities([sensor])
 
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN]["update_sensors"] = update_sensors
-
-    @callback
-    def remove_updater() -> None:
-        domain_data = hass.data.get(DOMAIN)
-        if domain_data and domain_data.get("update_sensors") is update_sensors:
-            domain_data.pop("update_sensors")
-
-    entry.async_on_unload(remove_updater)
+    entry.async_on_unload(coordinator.register_listener(update_sensors))
 
 
 def _migrate_legacy_unique_id(

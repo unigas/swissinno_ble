@@ -22,7 +22,7 @@ class MetadataTests(unittest.TestCase):
         self.assertTrue(manifest["config_flow"])
         self.assertTrue(manifest["single_config_entry"])
         self.assertEqual(manifest["integration_type"], "hub")
-        self.assertEqual(manifest["version"], "1.0.20")
+        self.assertEqual(manifest["version"], "1.0.21")
         self.assertIn("issue_tracker", manifest)
         self.assertIn("bluetooth_adapters", manifest["dependencies"])
         self.assertTrue((ROOT / "CHANGELOG.md").exists())
@@ -88,6 +88,14 @@ class MetadataTests(unittest.TestCase):
                 translations["entity"]["binary_sensor"]["trap_status"]["state"],
                 states,
             )
+
+    def test_sensor_platform_replays_late_observations(self):
+        binary_source = (INTEGRATION / "binary_sensor.py").read_text(
+            encoding="utf-8"
+        )
+        sensor_source = (INTEGRATION / "sensor.py").read_text(encoding="utf-8")
+        self.assertIn("coordinator.update(", binary_source)
+        self.assertIn("coordinator.register_listener(update_sensors)", sensor_source)
 
 
 if __name__ == "__main__":

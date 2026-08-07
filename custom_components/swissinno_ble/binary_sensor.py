@@ -14,12 +14,14 @@ from homeassistant.helpers.entity import DeviceInfo
 
 from .const import (
     ADVERTISEMENT_MATCHER,
+    DATA_COORDINATOR,
     DOMAIN,
     MANUFACTURER_ID,
     entity_unique_id,
     legacy_unique_ids,
     normalized_address,
 )
+from .coordinator import TrapObservation, TrapObservationCoordinator
 from .decoder import decode_frame
 
 _LOGGER = logging.getLogger(__name__)
@@ -33,6 +35,7 @@ async def async_setup_entry(
 
     sensors: dict[str, SwissinnoTrapSensor] = {}
     entity_registry = er.async_get(hass)
+    coordinator: TrapObservationCoordinator = hass.data[DOMAIN][DATA_COORDINATOR]
 
     @callback
     def detection_callback(service_info: BluetoothServiceInfoBleak, change):
@@ -86,9 +89,7 @@ async def async_setup_entry(
             @callback
             def unavailable_callback(_service_info, trap_id=trap_id):
                 sensors[trap_id].set_unavailable()
-                updater = hass.data.get(DOMAIN, {}).get("update_sensors")
-                if updater:
-                    updater(trap_id, available=False)
+                coordinator.set_unavailable(trap_id)
 
             entry.async_on_unload(
                 async_track_unavailable(
@@ -99,16 +100,16 @@ async def async_setup_entry(
                 )
             )
 
-        # Route to battery + RSSI sensors if available
-        updater = hass.data.get(DOMAIN, {}).get("update_sensors")
-        if updater:
-            updater(
-                trap_id,
+        # Cache before publishing so sensor setup can safely finish after the
+        # synchronous Bluetooth history replay performed during registration.
+        coordinator.update(
+            trap_id,
+            TrapObservation(
                 rssi=rssi,
                 battery_v=frame.battery_volts,
                 legacy_trap_ids=frame.legacy_trap_ids,
-                available=True,
-            )
+            ),
+        )
 
     cancel_callback = async_register_callback(
         hass,
