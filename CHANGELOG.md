@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.21
+
+- Fixed a platform setup race where the status entity received Home Assistant's
+  synchronously replayed Bluetooth advertisement before the battery and RSSI
+  platform had registered its update callback.
+- Added a shared observation coordinator that replays the latest real BLE data
+  to late platform listeners, making signal strength available immediately and
+  allowing battery stabilization to continue on the next advertisement.
+
 ## 1.0.20
 
 - Fixed Connect SuperCat status decoding: byte 0 is the ready/triggered flag;

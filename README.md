@@ -178,6 +178,13 @@ Voltage = (raw * 3.6) / 255
 ### ❓ Trap state updates slowly?
 Move the trap closer to the receiver or use more BLE proxies.
 
+### ❓ Battery voltage or signal strength stays unavailable after a reload?
+Version 1.0.21 fixes a platform setup race that could make battery and RSSI miss
+Home Assistant's cached Bluetooth advertisement while trap status was already
+available. RSSI is restored from that advertisement immediately. Battery still
+requires two matching real advertisements before its first value is published,
+which prevents transient startup readings from being shown as valid.
+
 ### ❓ The official app says ready but Home Assistant says caught?
 Version 1.0.20 fixes a Connect-frame decoder bug present in 1.0.19. Upgrade the
 integration and reload it before changing automations. Home Assistant displays
