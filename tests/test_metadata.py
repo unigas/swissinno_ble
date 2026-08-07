@@ -22,8 +22,10 @@ class MetadataTests(unittest.TestCase):
         self.assertTrue(manifest["config_flow"])
         self.assertTrue(manifest["single_config_entry"])
         self.assertEqual(manifest["integration_type"], "hub")
+        self.assertEqual(manifest["version"], "1.0.20")
         self.assertIn("issue_tracker", manifest)
         self.assertIn("bluetooth_adapters", manifest["dependencies"])
+        self.assertTrue((ROOT / "CHANGELOG.md").exists())
 
     def test_proxy_advertisements_are_discoverable(self):
         manifest = json.loads(
@@ -62,6 +64,30 @@ class MetadataTests(unittest.TestCase):
         )
         self.assertIn("entity", translations)
         self.assertFalse((INTEGRATION / "strings.json").exists())
+
+    def test_trap_binary_sensor_uses_translated_state_directly(self):
+        source = (INTEGRATION / "binary_sensor.py").read_text(encoding="utf-8")
+        self.assertNotIn("_attr_device_class", source)
+        self.assertIn("def is_on(self) -> bool | None:", source)
+        self.assertIn("return self._state", source)
+
+        expected_states = {
+            "de": {"off": "Bereit", "on": "Gefangen"},
+            "en": {"off": "Ready", "on": "Caught"},
+            "fr": {"off": "Prêt", "on": "Capturé"},
+            "it": {"off": "Pronta", "on": "Catturato"},
+            "sv": {"off": "Redo", "on": "Fångad"},
+        }
+        for language, states in expected_states.items():
+            translations = json.loads(
+                (INTEGRATION / "translations" / f"{language}.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            self.assertEqual(
+                translations["entity"]["binary_sensor"]["trap_status"]["state"],
+                states,
+            )
 
 
 if __name__ == "__main__":

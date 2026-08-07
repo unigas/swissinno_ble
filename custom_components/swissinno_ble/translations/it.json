@@ -17,7 +17,11 @@
   "entity": {
     "binary_sensor": {
       "trap_status": {
-        "name": "Stato"
+        "name": "Stato",
+        "state": {
+          "off": "Pronta",
+          "on": "Catturato"
+        }
       }
     },
     "button": {
