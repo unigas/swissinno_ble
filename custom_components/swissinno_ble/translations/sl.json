@@ -1,0 +1,41 @@
+{
+  "title": "Senzorji pasti SWISSINNO BLE",
+  "config": {
+    "abort": {
+      "already_configured": "Integracija SWISSINNO BLE je že konfigurirana."
+    },
+    "step": {
+      "user": {
+        "title": "Nastavitev SWISSINNO BLE",
+        "description": "Samodejno zazna vse pasti Bluetooth SWISSINNO.",
+        "data": {
+          "device_name": "Ime integracije"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Stanje",
+        "state": {
+          "off": "Pripravljena",
+          "on": "Ujeto"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Ponastavi past"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Napetost baterije"
+      },
+      "signal_strength": {
+        "name": "Moč signala"
+      }
+    }
+  }
+}

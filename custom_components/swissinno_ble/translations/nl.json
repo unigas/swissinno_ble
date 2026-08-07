@@ -1,0 +1,41 @@
+{
+  "title": "SWISSINNO BLE-vallensensoren",
+  "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE is al geconfigureerd."
+    },
+    "step": {
+      "user": {
+        "title": "SWISSINNO BLE instellen",
+        "description": "Detecteert automatisch alle SWISSINNO Bluetooth-vallen.",
+        "data": {
+          "device_name": "Integratienaam"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Status",
+        "state": {
+          "off": "Gereed",
+          "on": "Gevangen"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Val resetten"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Batterijspanning"
+      },
+      "signal_strength": {
+        "name": "Signaalsterkte"
+      }
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "title": "Сензори за капани SWISSINNO BLE",
+  "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE вече е конфигурирана."
+    },
+    "step": {
+      "user": {
+        "title": "Настройка на SWISSINNO BLE",
+        "description": "Автоматично открива всички Bluetooth капани SWISSINNO.",
+        "data": {
+          "device_name": "Име на интеграцията"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Състояние",
+        "state": {
+          "off": "Готов",
+          "on": "Уловено"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Нулиране на капана"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Напрежение на батерията"
+      },
+      "signal_strength": {
+        "name": "Сила на сигнала"
+      }
+    }
+  }
+}
