@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.22
+
+- Restored the explicit rodent icon for trap status.
+- Added explicit battery and Wi-Fi icons so voltage and RSSI entities no longer
+  depend on Home Assistant's generic default icons.
+- Declared RSSI as a signal-strength sensor device class.
+
 ## 1.0.21
 
 - Fixed a platform setup race where the status entity received Home Assistant's

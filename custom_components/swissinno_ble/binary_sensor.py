@@ -127,6 +127,7 @@ class SwissinnoTrapSensor(BinarySensorEntity):
     """Representation of a SWISSINNO BLE trap."""
 
     _attr_has_entity_name = True
+    _attr_icon = "mdi:rodent"
     _attr_translation_key = "trap_status"
 
     def __init__(self, trap_id: str, tripped: bool | None):

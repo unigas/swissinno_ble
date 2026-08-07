@@ -22,7 +22,7 @@ class MetadataTests(unittest.TestCase):
         self.assertTrue(manifest["config_flow"])
         self.assertTrue(manifest["single_config_entry"])
         self.assertEqual(manifest["integration_type"], "hub")
-        self.assertEqual(manifest["version"], "1.0.21")
+        self.assertEqual(manifest["version"], "1.0.22")
         self.assertIn("issue_tracker", manifest)
         self.assertIn("bluetooth_adapters", manifest["dependencies"])
         self.assertTrue((ROOT / "CHANGELOG.md").exists())
@@ -96,6 +96,19 @@ class MetadataTests(unittest.TestCase):
         sensor_source = (INTEGRATION / "sensor.py").read_text(encoding="utf-8")
         self.assertIn("coordinator.update(", binary_source)
         self.assertIn("coordinator.register_listener(update_sensors)", sensor_source)
+
+    def test_entities_have_stable_explicit_icons(self):
+        binary_source = (INTEGRATION / "binary_sensor.py").read_text(
+            encoding="utf-8"
+        )
+        sensor_source = (INTEGRATION / "sensor.py").read_text(encoding="utf-8")
+        self.assertIn('_attr_icon = "mdi:rodent"', binary_source)
+        self.assertIn('_attr_icon = "mdi:battery"', sensor_source)
+        self.assertIn('_attr_icon = "mdi:wifi"', sensor_source)
+        self.assertIn(
+            "_attr_device_class = SensorDeviceClass.SIGNAL_STRENGTH",
+            sensor_source,
+        )
 
 
 if __name__ == "__main__":
