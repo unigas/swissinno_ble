@@ -1,0 +1,41 @@
+{
+  "title": "Senzori zamki SWISSINNO BLE",
+  "config": {
+    "abort": {
+      "already_configured": "Integracija SWISSINNO BLE već je konfigurirana."
+    },
+    "step": {
+      "user": {
+        "title": "Postavljanje SWISSINNO BLE",
+        "description": "Automatski otkriva sve SWISSINNO Bluetooth zamke.",
+        "data": {
+          "device_name": "Naziv integracije"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Status",
+        "state": {
+          "off": "Spremna",
+          "on": "Uhvaćeno"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Resetiraj zamku"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Napon baterije"
+      },
+      "signal_strength": {
+        "name": "Jačina signala"
+      }
+    }
+  }
+}

@@ -22,7 +22,7 @@ class MetadataTests(unittest.TestCase):
         self.assertTrue(manifest["config_flow"])
         self.assertTrue(manifest["single_config_entry"])
         self.assertEqual(manifest["integration_type"], "hub")
-        self.assertEqual(manifest["version"], "1.0.24")
+        self.assertEqual(manifest["version"], "1.0.25")
         self.assertIn("issue_tracker", manifest)
         self.assertIn("bluetooth_adapters", manifest["dependencies"])
         self.assertTrue((ROOT / "CHANGELOG.md").exists())
@@ -72,18 +72,28 @@ class MetadataTests(unittest.TestCase):
         self.assertIn("return self._state", source)
 
         expected_states = {
+            "bg": {"off": "Готов", "on": "Уловено"},
+            "cs": {"off": "Připravena", "on": "Chyceno"},
             "da": {"off": "Klar", "on": "Fanget"},
             "de": {"off": "Bereit", "on": "Gefangen"},
             "en": {"off": "Ready", "on": "Caught"},
+            "es": {"off": "Lista", "on": "Capturado"},
             "et": {"off": "Valmis", "on": "Püütud"},
             "fi": {"off": "Valmis", "on": "Saalis"},
             "fr": {"off": "Prêt", "on": "Capturé"},
+            "hr": {"off": "Spremna", "on": "Uhvaćeno"},
+            "hu": {"off": "Kész", "on": "Elfogva"},
             "is": {"off": "Tilbúin", "on": "Fangað"},
             "it": {"off": "Pronta", "on": "Catturato"},
             "lt": {"off": "Paruošta", "on": "Sugauta"},
             "lv": {"off": "Gatavs", "on": "Noķerts"},
             "nb": {"off": "Klar", "on": "Fanget"},
+            "nl": {"off": "Gereed", "on": "Gevangen"},
             "pl": {"off": "Gotowa", "on": "Złapano"},
+            "pt": {"off": "Pronta", "on": "Capturado"},
+            "ro": {"off": "Pregătită", "on": "Capturat"},
+            "sk": {"off": "Pripravená", "on": "Chytené"},
+            "sl": {"off": "Pripravljena", "on": "Ujeto"},
             "sv": {"off": "Redo", "on": "Fångad"},
             "uk": {"off": "Готова", "on": "Спіймано"},
         }

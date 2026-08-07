@@ -40,7 +40,8 @@ No YAML needed. Everything is auto-discovered.
 ### ✔️ Localized UI
 Setup, entity names, and Ready/Caught states are available in English, German,
 French, Italian, Swedish, Norwegian Bokmål, Danish, Finnish, Icelandic,
-Estonian, Latvian, Lithuanian, Polish, and Ukrainian.
+Estonian, Latvian, Lithuanian, Polish, Ukrainian, Dutch, Spanish, Portuguese,
+Czech, Romanian, Hungarian, Slovak, Bulgarian, Slovenian, and Croatian.
 
 ---
 

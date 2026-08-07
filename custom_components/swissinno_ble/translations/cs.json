@@ -1,0 +1,41 @@
+{
+  "title": "Senzory pastí SWISSINNO BLE",
+  "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE je již nakonfigurováno."
+    },
+    "step": {
+      "user": {
+        "title": "Nastavení SWISSINNO BLE",
+        "description": "Automaticky rozpozná všechny Bluetooth pasti SWISSINNO.",
+        "data": {
+          "device_name": "Název integrace"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Stav",
+        "state": {
+          "off": "Připravena",
+          "on": "Chyceno"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Resetovat past"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Napětí baterie"
+      },
+      "signal_strength": {
+        "name": "Síla signálu"
+      }
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "title": "Snímače pascí SWISSINNO BLE",
+  "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE je už nakonfigurovaná."
+    },
+    "step": {
+      "user": {
+        "title": "Nastavenie SWISSINNO BLE",
+        "description": "Automaticky rozpozná všetky Bluetooth pasce SWISSINNO.",
+        "data": {
+          "device_name": "Názov integrácie"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Stav",
+        "state": {
+          "off": "Pripravená",
+          "on": "Chytené"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Resetovať pascu"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Napätie batérie"
+      },
+      "signal_strength": {
+        "name": "Sila signálu"
+      }
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "title": "Sensores de armadilhas SWISSINNO BLE",
+  "config": {
+    "abort": {
+      "already_configured": "A integração SWISSINNO BLE já está configurada."
+    },
+    "step": {
+      "user": {
+        "title": "Configuração do SWISSINNO BLE",
+        "description": "Deteta automaticamente todas as armadilhas Bluetooth SWISSINNO.",
+        "data": {
+          "device_name": "Nome da integração"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Estado",
+        "state": {
+          "off": "Pronta",
+          "on": "Capturado"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Repor armadilha"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Tensão da bateria"
+      },
+      "signal_strength": {
+        "name": "Intensidade do sinal"
+      }
+    }
+  }
+}

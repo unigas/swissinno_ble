@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.25
+
+- Added complete Dutch, Spanish, Portuguese, Czech, Romanian, Hungarian,
+  Slovak, Bulgarian, Slovenian, and Croatian translations.
+- Expanded translation parity and Ready/Caught state tests to all 24 supported
+  languages.
+
 ## 1.0.24
 
 - Added complete Norwegian Bokmål, Danish, Finnish, Icelandic, Estonian,

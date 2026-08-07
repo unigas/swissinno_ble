@@ -1,0 +1,41 @@
+{
+  "title": "Senzori pentru capcane SWISSINNO BLE",
+  "config": {
+    "abort": {
+      "already_configured": "SWISSINNO BLE este deja configurată."
+    },
+    "step": {
+      "user": {
+        "title": "Configurare SWISSINNO BLE",
+        "description": "Detectează automat toate capcanele Bluetooth SWISSINNO.",
+        "data": {
+          "device_name": "Numele integrării"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Stare",
+        "state": {
+          "off": "Pregătită",
+          "on": "Capturat"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Resetează capcana"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Tensiunea bateriei"
+      },
+      "signal_strength": {
+        "name": "Puterea semnalului"
+      }
+    }
+  }
+}

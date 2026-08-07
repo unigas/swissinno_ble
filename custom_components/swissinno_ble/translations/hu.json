@@ -1,0 +1,41 @@
+{
+  "title": "SWISSINNO BLE csapdaérzékelők",
+  "config": {
+    "abort": {
+      "already_configured": "A SWISSINNO BLE már konfigurálva van."
+    },
+    "step": {
+      "user": {
+        "title": "A SWISSINNO BLE beállítása",
+        "description": "Automatikusan felismeri az összes SWISSINNO Bluetooth-csapdát.",
+        "data": {
+          "device_name": "Integráció neve"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Állapot",
+        "state": {
+          "off": "Kész",
+          "on": "Elfogva"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Csapda visszaállítása"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Elemfeszültség"
+      },
+      "signal_strength": {
+        "name": "Jelerősség"
+      }
+    }
+  }
+}

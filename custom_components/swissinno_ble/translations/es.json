@@ -1,0 +1,41 @@
+{
+  "title": "Sensores de trampas SWISSINNO BLE",
+  "config": {
+    "abort": {
+      "already_configured": "La integración SWISSINNO BLE ya está configurada."
+    },
+    "step": {
+      "user": {
+        "title": "Configuración de SWISSINNO BLE",
+        "description": "Detecta automáticamente todas las trampas Bluetooth SWISSINNO.",
+        "data": {
+          "device_name": "Nombre de la integración"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "trap_status": {
+        "name": "Estado",
+        "state": {
+          "off": "Lista",
+          "on": "Capturado"
+        }
+      }
+    },
+    "button": {
+      "reset_trap": {
+        "name": "Restablecer trampa"
+      }
+    },
+    "sensor": {
+      "battery_voltage": {
+        "name": "Tensión de la batería"
+      },
+      "signal_strength": {
+        "name": "Intensidad de la señal"
+      }
+    }
+  }
+}
