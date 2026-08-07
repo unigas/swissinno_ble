@@ -106,6 +106,7 @@ class SwissinnoBatterySensor(SensorEntity):
 
     _attr_device_class = SensorDeviceClass.VOLTAGE
     _attr_has_entity_name = True
+    _attr_icon = "mdi:battery"
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
     _attr_translation_key = "battery_voltage"
 
@@ -137,7 +138,9 @@ class SwissinnoBatterySensor(SensorEntity):
 class SwissinnoRSSISensor(SensorEntity):
     """RSSI sensor."""
 
+    _attr_device_class = SensorDeviceClass.SIGNAL_STRENGTH
     _attr_has_entity_name = True
+    _attr_icon = "mdi:wifi"
     _attr_native_unit_of_measurement = SIGNAL_STRENGTH_DECIBELS_MILLIWATT
     _attr_translation_key = "signal_strength"
 
