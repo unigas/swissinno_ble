@@ -13,7 +13,18 @@ class MetadataTests(unittest.TestCase):
     def test_hacs_manifest_is_at_repository_root(self):
         hacs = json.loads((ROOT / "hacs.json").read_text(encoding="utf-8"))
         self.assertEqual(hacs["name"], "SWISSINNO BLE")
+        self.assertTrue(hacs["zip_release"])
+        self.assertEqual(hacs["filename"], "swissinno_ble.zip")
         self.assertFalse((INTEGRATION / "hacs.json").exists())
+
+        release_workflow = (
+            ROOT / ".github" / "workflows" / "release.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("release:", release_workflow)
+        self.assertIn("- published", release_workflow)
+        self.assertIn("contents: write", release_workflow)
+        self.assertIn("zip -r ../../swissinno_ble.zip", release_workflow)
+        self.assertIn("gh release upload", release_workflow)
 
     def test_home_assistant_manifest_declares_current_features(self):
         manifest = json.loads(
@@ -22,7 +33,7 @@ class MetadataTests(unittest.TestCase):
         self.assertTrue(manifest["config_flow"])
         self.assertTrue(manifest["single_config_entry"])
         self.assertEqual(manifest["integration_type"], "hub")
-        self.assertEqual(manifest["version"], "1.0.25")
+        self.assertEqual(manifest["version"], "1.0.26")
         self.assertIn("issue_tracker", manifest)
         self.assertIn("bluetooth_adapters", manifest["dependencies"])
         self.assertTrue((ROOT / "CHANGELOG.md").exists())

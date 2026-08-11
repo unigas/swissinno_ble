@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.26
+
+- Added a packaged integration ZIP to every new GitHub release and configured
+  HACS to install that counted release asset.
+- Added a public total release-download badge to the README.
+- Added regression coverage for the release packaging and HACS ZIP settings.
+
 ## 1.0.25
 
 - Added complete Dutch, Spanish, Portuguese, Czech, Romanian, Hungarian,

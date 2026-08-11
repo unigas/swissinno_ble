@@ -2,6 +2,8 @@
 
 A **custom Home Assistant integration** for **SWISSINNO Connect SuperCat and electronic SuperCat traps**, enabling real-time monitoring over Bluetooth Low Energy (BLE).
 
+[![Release downloads](https://img.shields.io/github/downloads/unigas/swissinno_ble/total?label=release%20downloads&logo=github)](https://github.com/unigas/swissinno_ble/releases)
+
 Supported Connect/legacy devices also expose **remote trap reset**. Electronic high-voltage traps require a physical power cycle for safety, as documented by SWISSINNO, and therefore do not expose a reset button.
 
 ![image](https://github.com/user-attachments/assets/99f7ad4c-0344-4547-89e7-5c4329c465a4)
