@@ -2,7 +2,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceEntry
 
-from .const import DATA_COORDINATOR, DOMAIN
+from .const import DATA_COORDINATOR, DOMAIN, is_legacy_payload_trap_id
 from .coordinator import TrapObservationCoordinator
 
 
@@ -30,5 +30,12 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_remove_config_entry_device(
     hass: HomeAssistant, config_entry: ConfigEntry, device_entry: DeviceEntry
 ) -> bool:
-    """Allow users to remove stale dynamically discovered trap devices."""
-    return True
+    """Allow users to remove only stale legacy payload-ID devices."""
+    trap_identifiers = [
+        identifier
+        for domain, identifier in device_entry.identifiers
+        if domain == DOMAIN
+    ]
+    return bool(trap_identifiers) and all(
+        is_legacy_payload_trap_id(identifier) for identifier in trap_identifiers
+    )

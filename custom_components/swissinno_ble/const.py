@@ -2,6 +2,7 @@ DOMAIN = "swissinno_ble"
 DATA_COORDINATOR = "coordinator"
 
 MANUFACTURER_ID = 3003
+_HEX_CHARACTERS = frozenset("0123456789abcdef")
 
 # Home Assistant treats a missing ``connectable`` matcher as ``True``. BLE
 # proxies can report trap advertisements as non-connectable even though the
@@ -21,6 +22,22 @@ CONNECTABLE_ADVERTISEMENT_MATCHER = {
 def normalized_address(address: str) -> str:
     """Return a stable identifier derived from a Bluetooth address."""
     return address.replace(":", "").replace("-", "").lower()
+
+
+def is_mac_based_trap_id(identifier: str) -> bool:
+    """Return whether an identifier is a normalized Bluetooth MAC address."""
+    normalized = identifier.lower()
+    return len(normalized) == 12 and all(
+        character in _HEX_CHARACTERS for character in normalized
+    )
+
+
+def is_legacy_payload_trap_id(identifier: str) -> bool:
+    """Return whether an identifier has a known legacy payload-ID format."""
+    normalized = identifier.lower()
+    return len(normalized) in (6, 8) and all(
+        character in _HEX_CHARACTERS for character in normalized
+    )
 
 
 def entity_unique_id(address: str, suffix: str | None = None) -> str:

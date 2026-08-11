@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.29
+
+- Restricted manual device removal to stale legacy payload-ID devices.
+- Protected active MAC-based devices from removal while their runtime entities
+  are loaded, ensuring they cannot disappear until the integration is reloaded.
+
 ## 1.0.28
 
 - Added Home Assistant device-removal support for dynamically discovered traps.
