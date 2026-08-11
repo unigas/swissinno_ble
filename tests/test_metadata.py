@@ -33,7 +33,7 @@ class MetadataTests(unittest.TestCase):
         self.assertTrue(manifest["config_flow"])
         self.assertTrue(manifest["single_config_entry"])
         self.assertEqual(manifest["integration_type"], "hub")
-        self.assertEqual(manifest["version"], "1.0.28")
+        self.assertEqual(manifest["version"], "1.0.29")
         self.assertIn("issue_tracker", manifest)
         self.assertIn("bluetooth_adapters", manifest["dependencies"])
         self.assertTrue((ROOT / "CHANGELOG.md").exists())
@@ -75,13 +75,26 @@ class MetadataTests(unittest.TestCase):
         self.assertIn("entity", translations)
         self.assertFalse((INTEGRATION / "strings.json").exists())
 
-    def test_stale_devices_can_be_removed_from_home_assistant(self):
+    def test_only_stale_legacy_devices_can_be_removed(self):
         source = (INTEGRATION / "__init__.py").read_text(encoding="utf-8")
         self.assertIn("async def async_remove_config_entry_device(", source)
-        remove_callback = source.split(
-            "async def async_remove_config_entry_device(", maxsplit=1
-        )[1]
-        self.assertIn("return True", remove_callback)
+        self.assertIn("device_entry.identifiers", source)
+        self.assertIn("is_legacy_payload_trap_id(identifier)", source)
+
+        spec = importlib.util.spec_from_file_location(
+            "swissinno_ble_const_identity", INTEGRATION / "const.py"
+        )
+        const = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(const)
+        self.assertTrue(const.is_mac_based_trap_id("c8aedc738048"))
+        self.assertTrue(const.is_mac_based_trap_id("C8AEDC738048"))
+        self.assertFalse(const.is_mac_based_trap_id("DC140300"))
+        self.assertFalse(const.is_mac_based_trap_id("1BDC14"))
+        self.assertFalse(const.is_mac_based_trap_id("not-a-mac-id"))
+        self.assertTrue(const.is_legacy_payload_trap_id("DC140300"))
+        self.assertTrue(const.is_legacy_payload_trap_id("1BDC14"))
+        self.assertFalse(const.is_legacy_payload_trap_id("c8aedc738048"))
+        self.assertFalse(const.is_legacy_payload_trap_id("not-a-trap"))
 
     def test_trap_binary_sensor_uses_translated_state_directly(self):
         source = (INTEGRATION / "binary_sensor.py").read_text(encoding="utf-8")

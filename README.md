@@ -111,10 +111,10 @@ registry entries untouched to avoid changing automations destructively; the
 unavailable legacy duplicate can then be removed manually after the MAC-based
 entity has been verified.
 
-From version 1.0.28, stale legacy devices can be removed directly from Home
+From version 1.0.29, stale legacy devices can be removed directly from Home
 Assistant. Open the obsolete device, use the three-dot menu, select **Delete**,
-and confirm. Only delete payload-based duplicates after verifying that the
-current MAC-based device and its automations work correctly.
+and confirm. The integration only permits removal of payload-based duplicates;
+current MAC-based devices are protected.
 
 Home Assistant translates new entity names using the system/backend language at
 the time each entity is created. Changing only a user's interface language does
@@ -241,10 +241,10 @@ the states as **Ready/Caught** (localized in the supported languages); their
 automation values remain `off`/`on`.
 
 ### ❓ Old duplicate trap devices cannot be deleted?
-Version 1.0.28 enables Home Assistant's device-removal action for dynamically
-discovered traps. Open each unavailable legacy device, choose the three-dot
-menu and select **Delete**. Do not delete the active MAC-based device; a real
-trap that is deleted will be discovered again the next time it advertises.
+Version 1.0.29 enables Home Assistant's device-removal action for stale legacy
+devices. Open each unavailable legacy device, choose the three-dot menu and
+select **Delete**. The integration rejects removal of current MAC-based devices
+so their loaded runtime entities cannot become detached from the device registry.
 
 If old payload-based and new MAC-based entities were both created before the
 upgrade, Home Assistant can show more devices than physically exist. Verify the
