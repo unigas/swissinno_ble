@@ -35,6 +35,9 @@
       },
       "signal_strength": {
         "name": "Potenza del segnale"
+      },
+      "last_seen": {
+        "name": "Ultimo rilevamento"
       }
     }
   }

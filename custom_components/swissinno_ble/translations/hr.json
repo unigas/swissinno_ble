@@ -35,6 +35,9 @@
       },
       "signal_strength": {
         "name": "Jačina signala"
+      },
+      "last_seen": {
+        "name": "Posljednji put viđeno"
       }
     }
   }

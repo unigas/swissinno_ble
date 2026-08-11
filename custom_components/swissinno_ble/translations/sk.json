@@ -35,6 +35,9 @@
       },
       "signal_strength": {
         "name": "Sila signálu"
+      },
+      "last_seen": {
+        "name": "Naposledy zaznamenané"
       }
     }
   }

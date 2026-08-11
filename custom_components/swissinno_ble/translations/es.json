@@ -35,6 +35,9 @@
       },
       "signal_strength": {
         "name": "Intensidad de la señal"
+      },
+      "last_seen": {
+        "name": "Última detección"
       }
     }
   }

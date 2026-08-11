@@ -35,6 +35,9 @@
       },
       "signal_strength": {
         "name": "Signāla stiprums"
+      },
+      "last_seen": {
+        "name": "Pēdējo reizi redzēts"
       }
     }
   }

@@ -29,6 +29,10 @@ Accurate battery readings with automatic updates and transient-value filtering.
 ### ✔️ RSSI (Signal Strength) Sensor  
 Helps you place traps for optimal Bluetooth coverage.
 
+### ✔️ Last Seen Sensor
+Shows when Home Assistant last received a fresh valid advertisement from each
+trap, making it easy to distinguish a confirmed Ready state from stale data.
+
 ### ✔️ Remote BLE Reset
 Supported Connect/legacy traps expose a **Reset Trap** button in Home Assistant.
 Electronic high-voltage traps intentionally require switching off and on again.
@@ -83,8 +87,8 @@ The integration will immediately begin scanning for nearby traps.
 
 No YAML configuration is needed.
 When a trap is detected, Home Assistant creates a **Ready/Caught status**,
-**battery voltage**, **Bluetooth signal strength**, and, for supported
-Connect/legacy devices, a **Reset Trap** button.
+**battery voltage**, **Bluetooth signal strength**, a diagnostic **Last seen**
+timestamp and, for supported Connect/legacy devices, a **Reset Trap** button.
 
 The integration uses the following stable unique IDs internally:
 
@@ -93,6 +97,7 @@ The integration uses the following stable unique IDs internally:
 | Status | `swissinno_trap_<MAC>` |
 | Battery voltage | `swissinno_trap_<MAC>_battery` |
 | Signal strength | `swissinno_trap_<MAC>_rssi` |
+| Last seen | `swissinno_trap_<MAC>_last_seen` |
 | Reset button | `swissinno_trap_<MAC>_reset` |
 
 `<MAC>` is the Bluetooth address without separators, in lowercase. This makes
@@ -211,11 +216,13 @@ as 2.37 V is no longer normally displayed as 2 V.
 Move the trap closer to the receiver or use more BLE proxies.
 
 ### ❓ Battery voltage or signal strength stays unavailable after a reload?
-Version 1.0.21 fixes a platform setup race that could make battery and RSSI miss
-Home Assistant's cached Bluetooth advertisement while trap status was already
-available. RSSI is restored from that advertisement immediately. Battery still
-requires two matching real advertisements before its first value is published,
-which prevents transient startup readings from being shown as valid.
+From version 1.0.27, cached Bluetooth history from before the reload is ignored.
+Status and signal strength therefore remain unavailable until the first fresh
+valid advertisement arrives. Battery voltage requires two consistent fresh
+advertisements before its first value is published, which prevents transient
+startup readings from being shown as valid. The Last seen sensor records the
+most recent fresh advertisement and remains visible if the trap later becomes
+unavailable.
 
 ### ❓ The official app says ready but Home Assistant says caught?
 Version 1.0.20 fixes a Connect-frame decoder bug present in 1.0.19. Upgrade the

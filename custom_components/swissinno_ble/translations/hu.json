@@ -35,6 +35,9 @@
       },
       "signal_strength": {
         "name": "Jelerősség"
+      },
+      "last_seen": {
+        "name": "Utoljára észlelve"
       }
     }
   }

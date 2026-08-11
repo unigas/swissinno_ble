@@ -33,7 +33,7 @@ class MetadataTests(unittest.TestCase):
         self.assertTrue(manifest["config_flow"])
         self.assertTrue(manifest["single_config_entry"])
         self.assertEqual(manifest["integration_type"], "hub")
-        self.assertEqual(manifest["version"], "1.0.26")
+        self.assertEqual(manifest["version"], "1.0.27")
         self.assertIn("issue_tracker", manifest)
         self.assertIn("bluetooth_adapters", manifest["dependencies"])
         self.assertTrue((ROOT / "CHANGELOG.md").exists())
@@ -152,6 +152,23 @@ class MetadataTests(unittest.TestCase):
         sensor_source = (INTEGRATION / "sensor.py").read_text(encoding="utf-8")
         self.assertIn("coordinator.update(", binary_source)
         self.assertIn("coordinator.register_listener(update_sensors)", sensor_source)
+
+    def test_cached_status_is_rejected_and_last_seen_is_exposed(self):
+        binary_source = (INTEGRATION / "binary_sensor.py").read_text(
+            encoding="utf-8"
+        )
+        sensor_source = (INTEGRATION / "sensor.py").read_text(encoding="utf-8")
+        self.assertIn(
+            "is_fresh_advertisement(service_info.time, accept_after)", binary_source
+        )
+        self.assertIn("last_seen=datetime.now(UTC)", binary_source)
+        self.assertIn("SensorDeviceClass.TIMESTAMP", sensor_source)
+        self.assertIn('_attr_translation_key = "last_seen"', sensor_source)
+        update_section, migration_section = sensor_source.split(
+            "def _migrate_legacy_unique_id", maxsplit=1
+        )
+        self.assertIn("observation.last_seen", update_section)
+        self.assertNotIn("observation.last_seen", migration_section)
 
     def test_entities_have_stable_explicit_icons(self):
         binary_source = (INTEGRATION / "binary_sensor.py").read_text(

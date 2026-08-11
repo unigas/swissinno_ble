@@ -35,6 +35,9 @@
       },
       "signal_strength": {
         "name": "Signal strength"
+      },
+      "last_seen": {
+        "name": "Last seen"
       }
     }
   }
