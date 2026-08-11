@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.28
+
+- Added Home Assistant device-removal support for dynamically discovered traps.
+- Users can now delete stale legacy payload-ID devices from the device page
+  without removing the integration or affecting current MAC-based devices.
+- Added regression coverage and cleanup instructions for legacy duplicates.
+
 ## 1.0.27
 
 - Ignore Bluetooth history cached before integration setup so trap status and

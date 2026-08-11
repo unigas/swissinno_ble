@@ -33,7 +33,7 @@ class MetadataTests(unittest.TestCase):
         self.assertTrue(manifest["config_flow"])
         self.assertTrue(manifest["single_config_entry"])
         self.assertEqual(manifest["integration_type"], "hub")
-        self.assertEqual(manifest["version"], "1.0.27")
+        self.assertEqual(manifest["version"], "1.0.28")
         self.assertIn("issue_tracker", manifest)
         self.assertIn("bluetooth_adapters", manifest["dependencies"])
         self.assertTrue((ROOT / "CHANGELOG.md").exists())
@@ -75,6 +75,14 @@ class MetadataTests(unittest.TestCase):
         )
         self.assertIn("entity", translations)
         self.assertFalse((INTEGRATION / "strings.json").exists())
+
+    def test_stale_devices_can_be_removed_from_home_assistant(self):
+        source = (INTEGRATION / "__init__.py").read_text(encoding="utf-8")
+        self.assertIn("async def async_remove_config_entry_device(", source)
+        remove_callback = source.split(
+            "async def async_remove_config_entry_device(", maxsplit=1
+        )[1]
+        self.assertIn("return True", remove_callback)
 
     def test_trap_binary_sensor_uses_translated_state_directly(self):
         source = (INTEGRATION / "binary_sensor.py").read_text(encoding="utf-8")
