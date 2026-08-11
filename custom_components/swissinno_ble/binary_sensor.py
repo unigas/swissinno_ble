@@ -2,6 +2,7 @@ import logging
 from datetime import UTC, datetime
 from time import monotonic
 
+from homeassistant.components import bluetooth
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.components.bluetooth import (
     BluetoothScanningMode,
@@ -49,6 +50,7 @@ async def async_setup_entry(
                 "Ignoring cached advertisement for %s from before integration setup",
                 service_info.address,
             )
+            _clear_advertisement_history(hass, service_info.address)
             return
 
         man = service_info.manufacturer_data
@@ -122,6 +124,7 @@ async def async_setup_entry(
                 last_seen=datetime.now(UTC),
             ),
         )
+        _clear_advertisement_history(hass, service_info.address)
 
     cancel_callback = async_register_callback(
         hass,
@@ -133,6 +136,14 @@ async def async_setup_entry(
     entry.async_on_unload(cancel_callback)
 
     _LOGGER.info("SWISSINNO BLE: Bluetooth scanner callback registered.")
+
+
+def _clear_advertisement_history(hass: HomeAssistant, address: str) -> None:
+    """Ensure the next identical trap advertisement reaches the callback."""
+    if clear_history := getattr(
+        bluetooth, "async_clear_advertisement_history", None
+    ):
+        clear_history(hass, address)
 
 
 class SwissinnoTrapSensor(BinarySensorEntity):

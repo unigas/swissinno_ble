@@ -56,7 +56,6 @@ class MetadataTests(unittest.TestCase):
             const.ADVERTISEMENT_MATCHER,
             {
                 "manufacturer_id": const.MANUFACTURER_ID,
-                "service_uuid": const.SERVICE_UUID,
                 "connectable": False,
             },
         )
@@ -177,6 +176,25 @@ class MetadataTests(unittest.TestCase):
         )
         self.assertIn("observation.last_seen", update_section)
         self.assertNotIn("observation.last_seen", migration_section)
+
+    def test_repeated_manufacturer_advertisements_are_delivered(self):
+        binary_source = (INTEGRATION / "binary_sensor.py").read_text(
+            encoding="utf-8"
+        )
+        manifest = json.loads(
+            (INTEGRATION / "manifest.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(
+            manifest["bluetooth"],
+            [{"connectable": False, "manufacturer_id": 3003}],
+        )
+        self.assertIn("async_clear_advertisement_history", binary_source)
+        self.assertGreaterEqual(
+            binary_source.count(
+                "_clear_advertisement_history(hass, service_info.address)"
+            ),
+            2,
+        )
 
     def test_entities_have_stable_explicit_icons(self):
         binary_source = (INTEGRATION / "binary_sensor.py").read_text(

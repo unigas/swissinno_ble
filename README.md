@@ -220,6 +220,11 @@ as 2.37 V is no longer normally displayed as 2 V.
 ### ❓ Trap state updates slowly?
 Move the trap closer to the receiver or use more BLE proxies.
 
+Version 1.0.28 also accepts SWISSINNO manufacturer-only advertisements and, on
+supported Home Assistant versions, clears Bluetooth advertisement
+deduplication after each valid packet. This lets repeated unchanged packets
+refresh signal strength and Last seen instead of being silently suppressed.
+
 ### ❓ Battery voltage or signal strength stays unavailable after a reload?
 From version 1.0.27, cached Bluetooth history from before the reload is ignored.
 Status and signal strength therefore remain unavailable until the first fresh

@@ -5,6 +5,9 @@
 - Added Home Assistant device-removal support for dynamically discovered traps.
 - Users can now delete stale legacy payload-ID devices from the device page
   without removing the integration or affecting current MAC-based devices.
+- Accepts manufacturer-only proxy advertisements and clears Home Assistant's
+  deduplication history after valid packets so repeated advertisements update
+  Last seen and RSSI on supported Home Assistant versions.
 - Added regression coverage and cleanup instructions for legacy duplicates.
 
 ## 1.0.27
