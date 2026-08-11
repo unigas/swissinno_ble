@@ -33,7 +33,7 @@ class MetadataTests(unittest.TestCase):
         self.assertTrue(manifest["config_flow"])
         self.assertTrue(manifest["single_config_entry"])
         self.assertEqual(manifest["integration_type"], "hub")
-        self.assertEqual(manifest["version"], "1.0.27")
+        self.assertEqual(manifest["version"], "1.0.28")
         self.assertIn("issue_tracker", manifest)
         self.assertIn("bluetooth_adapters", manifest["dependencies"])
         self.assertTrue((ROOT / "CHANGELOG.md").exists())
@@ -56,7 +56,6 @@ class MetadataTests(unittest.TestCase):
             const.ADVERTISEMENT_MATCHER,
             {
                 "manufacturer_id": const.MANUFACTURER_ID,
-                "service_uuid": const.SERVICE_UUID,
                 "connectable": False,
             },
         )
@@ -75,6 +74,14 @@ class MetadataTests(unittest.TestCase):
         )
         self.assertIn("entity", translations)
         self.assertFalse((INTEGRATION / "strings.json").exists())
+
+    def test_stale_devices_can_be_removed_from_home_assistant(self):
+        source = (INTEGRATION / "__init__.py").read_text(encoding="utf-8")
+        self.assertIn("async def async_remove_config_entry_device(", source)
+        remove_callback = source.split(
+            "async def async_remove_config_entry_device(", maxsplit=1
+        )[1]
+        self.assertIn("return True", remove_callback)
 
     def test_trap_binary_sensor_uses_translated_state_directly(self):
         source = (INTEGRATION / "binary_sensor.py").read_text(encoding="utf-8")
@@ -169,6 +176,25 @@ class MetadataTests(unittest.TestCase):
         )
         self.assertIn("observation.last_seen", update_section)
         self.assertNotIn("observation.last_seen", migration_section)
+
+    def test_repeated_manufacturer_advertisements_are_delivered(self):
+        binary_source = (INTEGRATION / "binary_sensor.py").read_text(
+            encoding="utf-8"
+        )
+        manifest = json.loads(
+            (INTEGRATION / "manifest.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(
+            manifest["bluetooth"],
+            [{"connectable": False, "manufacturer_id": 3003}],
+        )
+        self.assertIn("async_clear_advertisement_history", binary_source)
+        self.assertGreaterEqual(
+            binary_source.count(
+                "_clear_advertisement_history(hass, service_info.address)"
+            ),
+            2,
+        )
 
     def test_entities_have_stable_explicit_icons(self):
         binary_source = (INTEGRATION / "binary_sensor.py").read_text(

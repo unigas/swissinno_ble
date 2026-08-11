@@ -111,6 +111,11 @@ registry entries untouched to avoid changing automations destructively; the
 unavailable legacy duplicate can then be removed manually after the MAC-based
 entity has been verified.
 
+From version 1.0.28, stale legacy devices can be removed directly from Home
+Assistant. Open the obsolete device, use the three-dot menu, select **Delete**,
+and confirm. Only delete payload-based duplicates after verifying that the
+current MAC-based device and its automations work correctly.
+
 Home Assistant translates new entity names using the system/backend language at
 the time each entity is created. Changing only a user's interface language does
 not rename existing entities; their display names can be edited safely without
@@ -215,6 +220,11 @@ as 2.37 V is no longer normally displayed as 2 V.
 ### ❓ Trap state updates slowly?
 Move the trap closer to the receiver or use more BLE proxies.
 
+Version 1.0.28 also accepts SWISSINNO manufacturer-only advertisements and, on
+supported Home Assistant versions, clears Bluetooth advertisement
+deduplication after each valid packet. This lets repeated unchanged packets
+refresh signal strength and Last seen instead of being silently suppressed.
+
 ### ❓ Battery voltage or signal strength stays unavailable after a reload?
 From version 1.0.27, cached Bluetooth history from before the reload is ignored.
 Status and signal strength therefore remain unavailable until the first fresh
@@ -229,6 +239,12 @@ Version 1.0.20 fixes a Connect-frame decoder bug present in 1.0.19. Upgrade the
 integration and reload it before changing automations. Home Assistant displays
 the states as **Ready/Caught** (localized in the supported languages); their
 automation values remain `off`/`on`.
+
+### ❓ Old duplicate trap devices cannot be deleted?
+Version 1.0.28 enables Home Assistant's device-removal action for dynamically
+discovered traps. Open each unavailable legacy device, choose the three-dot
+menu and select **Delete**. Do not delete the active MAC-based device; a real
+trap that is deleted will be discovered again the next time it advertises.
 
 If old payload-based and new MAC-based entities were both created before the
 upgrade, Home Assistant can show more devices than physically exist. Verify the
