@@ -35,6 +35,9 @@
       },
       "signal_strength": {
         "name": "Signalo stiprumas"
+      },
+      "last_seen": {
+        "name": "Paskutinį kartą aptikta"
       }
     }
   }

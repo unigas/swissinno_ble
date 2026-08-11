@@ -35,6 +35,9 @@
       },
       "signal_strength": {
         "name": "Signaali tugevus"
+      },
+      "last_seen": {
+        "name": "Viimati nähtud"
       }
     }
   }

@@ -1,4 +1,6 @@
 import logging
+from datetime import UTC, datetime
+from time import monotonic
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.components.bluetooth import (
@@ -23,6 +25,7 @@ from .const import (
 )
 from .coordinator import TrapObservation, TrapObservationCoordinator
 from .decoder import decode_frame
+from .freshness import is_fresh_advertisement
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,10 +39,18 @@ async def async_setup_entry(
     sensors: dict[str, SwissinnoTrapSensor] = {}
     entity_registry = er.async_get(hass)
     coordinator: TrapObservationCoordinator = hass.data[DOMAIN][DATA_COORDINATOR]
+    accept_after = monotonic()
 
     @callback
     def detection_callback(service_info: BluetoothServiceInfoBleak, change):
         """Handle BLE advertisements."""
+        if not is_fresh_advertisement(service_info.time, accept_after):
+            _LOGGER.debug(
+                "Ignoring cached advertisement for %s from before integration setup",
+                service_info.address,
+            )
+            return
+
         man = service_info.manufacturer_data
         if MANUFACTURER_ID not in man:
             return
@@ -108,6 +119,7 @@ async def async_setup_entry(
                 rssi=rssi,
                 battery_v=frame.battery_volts,
                 legacy_trap_ids=frame.legacy_trap_ids,
+                last_seen=datetime.now(UTC),
             ),
         )
 

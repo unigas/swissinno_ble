@@ -35,6 +35,9 @@
       },
       "signal_strength": {
         "name": "Signalstyrka"
+      },
+      "last_seen": {
+        "name": "Senast sedd"
       }
     }
   }

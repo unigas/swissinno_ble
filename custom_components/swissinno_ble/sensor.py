@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
@@ -8,6 +9,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.entity import EntityCategory
 
 from .battery import BatteryStabilizer
 from .const import DATA_COORDINATOR, DOMAIN, entity_unique_id, legacy_unique_ids
@@ -25,6 +27,7 @@ async def async_setup_entry(
     battery_sensors: dict[str, SwissinnoBatterySensor] = {}
     battery_stabilizers: dict[str, BatteryStabilizer] = {}
     rssi_sensors: dict[str, SwissinnoRSSISensor] = {}
+    last_seen_sensors: dict[str, SwissinnoLastSeenSensor] = {}
     entity_registry = er.async_get(hass)
     coordinator: TrapObservationCoordinator = hass.data[DOMAIN][DATA_COORDINATOR]
 
@@ -73,6 +76,16 @@ async def async_setup_entry(
             sensor = SwissinnoRSSISensor(trap_id, observation.rssi)
             rssi_sensors[trap_id] = sensor
             async_add_entities([sensor])
+
+        # Keep the diagnostic timestamp available even when the trap later
+        # becomes unavailable, so users can see when it was last received.
+        if observation.last_seen is not None:
+            if trap_id in last_seen_sensors:
+                last_seen_sensors[trap_id].update_value(observation.last_seen)
+            else:
+                sensor = SwissinnoLastSeenSensor(trap_id, observation.last_seen)
+                last_seen_sensors[trap_id] = sensor
+                async_add_entities([sensor])
 
     entry.async_on_unload(coordinator.register_listener(update_sensors))
 
@@ -167,4 +180,27 @@ class SwissinnoRSSISensor(SensorEntity):
     @callback
     def set_unavailable(self) -> None:
         self._attr_available = False
+        self.async_write_ha_state()
+
+
+class SwissinnoLastSeenSensor(SensorEntity):
+    """Timestamp of the most recent fresh trap advertisement."""
+
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_has_entity_name = True
+    _attr_icon = "mdi:clock-outline"
+    _attr_translation_key = "last_seen"
+
+    def __init__(self, trap_id: str, last_seen: datetime):
+        self._attr_unique_id = entity_unique_id(trap_id, "last_seen")
+        self._attr_native_value = last_seen
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, trap_id)},
+            "manufacturer": "SWISSINNO",
+            "name": f"SWISSINNO Trap {trap_id}",
+        }
+
+    def update_value(self, last_seen: datetime) -> None:
+        self._attr_native_value = last_seen
         self.async_write_ha_state()

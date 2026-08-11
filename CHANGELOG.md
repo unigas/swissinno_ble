@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.27
+
+- Ignore Bluetooth history cached before integration setup so trap status and
+  RSSI remain unavailable until a fresh advertisement is received.
+- Added a diagnostic Last seen timestamp that updates for every valid fresh
+  advertisement and remains visible when the trap becomes unavailable.
+- Kept battery voltage unavailable until two consistent fresh samples confirm
+  the reading.
+- Added Last seen translations for all 24 supported languages and regression
+  coverage for cached-advertisement filtering and timestamp retention.
+
 ## 1.0.26
 
 - Added a packaged integration ZIP to every new GitHub release and configured

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, replace
+from datetime import datetime
 
 
 @dataclass(frozen=True)
@@ -13,6 +14,7 @@ class TrapObservation:
     rssi: int | None
     battery_v: float | None
     legacy_trap_ids: tuple[str, ...]
+    last_seen: datetime | None = None
     available: bool = True
 
 

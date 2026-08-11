@@ -35,6 +35,9 @@
       },
       "signal_strength": {
         "name": "Signalstyrke"
+      },
+      "last_seen": {
+        "name": "Sidst set"
       }
     }
   }

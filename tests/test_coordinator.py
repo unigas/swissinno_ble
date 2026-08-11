@@ -3,6 +3,7 @@
 import importlib.util
 import sys
 import unittest
+from datetime import UTC, datetime
 from pathlib import Path
 
 COORDINATOR_PATH = (
@@ -77,6 +78,26 @@ class TrapObservationCoordinatorTests(unittest.TestCase):
         store.register_listener(lambda trap_id, value: received.append(value))
 
         self.assertEqual(len(received), 1)
+        self.assertFalse(received[0].available)
+
+    def test_unavailable_state_preserves_last_seen(self):
+        store = coordinator.TrapObservationCoordinator()
+        last_seen = datetime(2026, 8, 11, 14, 30, tzinfo=UTC)
+        store.update(
+            "c8aedc738048",
+            coordinator.TrapObservation(
+                rssi=-65,
+                battery_v=3.1,
+                legacy_trap_ids=("DC140300",),
+                last_seen=last_seen,
+            ),
+        )
+        store.set_unavailable("c8aedc738048")
+
+        received = []
+        store.register_listener(lambda _trap_id, value: received.append(value))
+
+        self.assertEqual(received[0].last_seen, last_seen)
         self.assertFalse(received[0].available)
 
     def test_replay_does_not_count_as_two_battery_advertisements(self):

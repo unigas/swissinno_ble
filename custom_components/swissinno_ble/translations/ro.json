@@ -35,6 +35,9 @@
       },
       "signal_strength": {
         "name": "Puterea semnalului"
+      },
+      "last_seen": {
+        "name": "Văzut ultima dată"
       }
     }
   }

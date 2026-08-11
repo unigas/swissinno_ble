@@ -35,6 +35,9 @@
       },
       "signal_strength": {
         "name": "Merkisstyrkur"
+      },
+      "last_seen": {
+        "name": "Sást síðast"
       }
     }
   }
