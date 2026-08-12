@@ -1,0 +1,114 @@
+name: Bug report
+description: Report reproducible incorrect behavior in the integration
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve SWISSINNO BLE. Do not use this form for security vulnerabilities; follow SECURITY.md instead.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I am using the latest published integration version and restarted Home Assistant after updating.
+          required: true
+        - label: I searched existing issues and did not find the same problem.
+          required: true
+        - label: This report does not contain secrets or unrelated personal information.
+          required: true
+
+  - type: input
+    id: integration_version
+    attributes:
+      label: Integration version
+      placeholder: 1.0.29
+    validations:
+      required: true
+
+  - type: input
+    id: home_assistant_version
+    attributes:
+      label: Home Assistant version
+      placeholder: 2026.8.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: trap_family
+    attributes:
+      label: Trap family
+      options:
+        - Connect SuperCat
+        - Electronic SuperCat
+        - Legacy or unknown
+    validations:
+      required: true
+
+  - type: input
+    id: hardware
+    attributes:
+      label: Hardware identification
+      description: Product number, revision or label, if known. You may redact the Bluetooth address.
+      placeholder: Product 1 272 000, version 1.0
+
+  - type: dropdown
+    id: bluetooth_path
+    attributes:
+      label: Bluetooth connection
+      options:
+        - Home Assistant host Bluetooth
+        - ESPHome Bluetooth proxy
+        - Other Bluetooth proxy
+        - Unknown
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and when it started.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Reload the integration
+        2. Wait for two fresh advertisements
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: payloads
+    attributes:
+      label: Raw BLE manufacturer payloads
+      description: For decoder issues, include complete payloads from known states before and after the problem. Never create an unsafe trap condition.
+      render: text
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Enable debug logging if appropriate and remove secrets and unrelated personal information.
+      render: text
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Screenshots, official-app state, proxy observations, or other useful details.

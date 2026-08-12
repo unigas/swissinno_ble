@@ -288,9 +288,9 @@ then remove only the unavailable legacy duplicates from Home Assistant.
 # 🤝 Contributing
 
 Contributions are welcome!
-- Found a bug? Open an issue.  
-- Want a new feature? Create a pull request.  
-- Improvements to decoding or UI are highly appreciated.  
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull
+request. Improvements to decoding, hardware support, translations, tests and
+documentation are highly appreciated.
 
 ---
 
