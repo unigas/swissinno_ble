@@ -216,13 +216,24 @@ entities:
   - entity: sensor.your_trap_signal_strength
     name: Signal Strength
 
+  - entity: sensor.your_trap_last_seen
+    name: Last Seen
+
+  - entity: sensor.your_trap_last_triggered
+    name: Last Triggered
+
+  - entity: sensor.your_trap_trigger_count
+    name: Trigger Count
+
+  # Connect/legacy traps only; remove this row for Electronic SuperCat.
   - entity: button.your_trap_reset
     name: Reset Trap
 ```
 
 Replace the placeholder entity IDs with the actual IDs shown by Home Assistant.
-No custom Lovelace card is required; battery voltage suggests two decimal places
-from version 1.0.23 onward.
+Electronic SuperCat traps do not create a reset button, so omit that row for
+electronic traps. No custom Lovelace card is required; battery voltage suggests
+two decimal places from version 1.0.23 onward.
 
 ---
 
