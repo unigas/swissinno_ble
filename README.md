@@ -142,7 +142,8 @@ SWISSINNO devices use two observed 10-byte formats:
 For Connect frames, bytes 2–5 are the stable hardware ID. They are not a
 counter/status field. Unknown status values are reported as unknown instead of
 being guessed as ready or triggered. The detected family is shown as the model
-on the Home Assistant device page.
+on the Home Assistant device page. Debug logging includes the complete raw
+manufacturer payload to support investigation of unknown future status values.
 
 ## Trigger history and automations
 

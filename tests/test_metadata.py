@@ -226,6 +226,13 @@ class MetadataTests(unittest.TestCase):
         self.assertIn("def _device_info(trap_id: str, model:", sensor_source)
         self.assertIn("model=model", sensor_source)
 
+    def test_debug_log_includes_complete_manufacturer_payload(self):
+        binary_source = (INTEGRATION / "binary_sensor.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('manufacturer_payload=%s', binary_source)
+        self.assertIn('payload.hex(" ").upper()', binary_source)
+
     def test_repeated_manufacturer_advertisements_are_delivered(self):
         binary_source = (INTEGRATION / "binary_sensor.py").read_text(
             encoding="utf-8"

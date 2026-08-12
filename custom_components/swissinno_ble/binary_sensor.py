@@ -57,7 +57,8 @@ async def async_setup_entry(
         if MANUFACTURER_ID not in man:
             return
 
-        frame = decode_frame(man[MANUFACTURER_ID])
+        payload = man[MANUFACTURER_ID]
+        frame = decode_frame(payload)
         if not frame:
             return
 
@@ -84,12 +85,15 @@ async def async_setup_entry(
                     break
 
         _LOGGER.debug(
-            "Trap %s: status=0x%02X, tripped=%s, RSSI=%s dBm, battery=%s V",
+            "Trap %s (%s): status=0x%02X, tripped=%s, RSSI=%s dBm, "
+            "battery=%s V, manufacturer_payload=%s",
             trap_id,
+            frame.model,
             frame.status,
             frame.is_tripped,
             rssi,
             frame.battery_volts,
+            payload.hex(" ").upper(),
         )
 
         if trap_id in sensors:
