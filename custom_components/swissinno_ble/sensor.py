@@ -13,7 +13,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import entity_registry as er
-from homeassistant.helpers.entity import EntityCategory
+from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 
 from .battery import BatteryStabilizer
 from .const import DATA_COORDINATOR, DOMAIN, entity_unique_id, legacy_unique_ids
@@ -64,7 +64,9 @@ async def async_setup_entry(
                     "battery",
                     entity_unique_id(trap_id, "battery"),
                 )
-                sensor = SwissinnoBatterySensor(trap_id, stable_battery_v)
+                sensor = SwissinnoBatterySensor(
+                    trap_id, stable_battery_v, observation.model
+                )
                 battery_sensors[trap_id] = sensor
                 async_add_entities([sensor])
 
@@ -79,7 +81,9 @@ async def async_setup_entry(
                 "rssi",
                 entity_unique_id(trap_id, "rssi"),
             )
-            sensor = SwissinnoRSSISensor(trap_id, observation.rssi)
+            sensor = SwissinnoRSSISensor(
+                trap_id, observation.rssi, observation.model
+            )
             rssi_sensors[trap_id] = sensor
             async_add_entities([sensor])
 
@@ -89,7 +93,9 @@ async def async_setup_entry(
             if trap_id in last_seen_sensors:
                 last_seen_sensors[trap_id].update_value(observation.last_seen)
             else:
-                sensor = SwissinnoLastSeenSensor(trap_id, observation.last_seen)
+                sensor = SwissinnoLastSeenSensor(
+                    trap_id, observation.last_seen, observation.model
+                )
                 last_seen_sensors[trap_id] = sensor
                 async_add_entities([sensor])
 
@@ -99,7 +105,7 @@ async def async_setup_entry(
             )
         else:
             sensor = SwissinnoLastTriggeredSensor(
-                trap_id, observation.last_triggered
+                trap_id, observation.last_triggered, observation.model
             )
             last_triggered_sensors[trap_id] = sensor
             async_add_entities([sensor])
@@ -110,12 +116,22 @@ async def async_setup_entry(
             )
         else:
             sensor = SwissinnoTriggerCountSensor(
-                trap_id, observation.trigger_count
+                trap_id, observation.trigger_count, observation.model
             )
             trigger_count_sensors[trap_id] = sensor
             async_add_entities([sensor])
 
     entry.async_on_unload(coordinator.register_listener(update_sensors))
+
+
+def _device_info(trap_id: str, model: str | None) -> DeviceInfo:
+    """Return consistent device metadata for every trap entity."""
+    return DeviceInfo(
+        identifiers={(DOMAIN, trap_id)},
+        manufacturer="SWISSINNO",
+        model=model,
+        name=f"SWISSINNO Trap {trap_id}",
+    )
 
 
 def _migrate_legacy_unique_id(
@@ -152,7 +168,9 @@ class SwissinnoBatterySensor(SensorEntity):
     _attr_suggested_display_precision = 2
     _attr_translation_key = "battery_voltage"
 
-    def __init__(self, trap_id: str, battery_v: float | None):
+    def __init__(
+        self, trap_id: str, battery_v: float | None, model: str | None
+    ):
         self._trap_id = trap_id
         self._value = battery_v
         self._attr_available = True
@@ -160,11 +178,7 @@ class SwissinnoBatterySensor(SensorEntity):
         self._attr_unique_id = entity_unique_id(trap_id, "battery")
         self._attr_native_value = battery_v
 
-        self._attr_device_info = {
-            "identifiers": {(DOMAIN, trap_id)},
-            "manufacturer": "SWISSINNO",
-            "name": f"SWISSINNO Trap {trap_id}",
-        }
+        self._attr_device_info = _device_info(trap_id, model)
 
     def update_value(self, value: float | None):
         self._attr_native_value = value
@@ -186,7 +200,7 @@ class SwissinnoRSSISensor(SensorEntity):
     _attr_native_unit_of_measurement = SIGNAL_STRENGTH_DECIBELS_MILLIWATT
     _attr_translation_key = "signal_strength"
 
-    def __init__(self, trap_id: str, rssi: int | None):
+    def __init__(self, trap_id: str, rssi: int | None, model: str | None):
         self._trap_id = trap_id
         self._value = rssi
         self._attr_available = True
@@ -194,11 +208,7 @@ class SwissinnoRSSISensor(SensorEntity):
         self._attr_unique_id = entity_unique_id(trap_id, "rssi")
         self._attr_native_value = rssi
 
-        self._attr_device_info = {
-            "identifiers": {(DOMAIN, trap_id)},
-            "manufacturer": "SWISSINNO",
-            "name": f"SWISSINNO Trap {trap_id}",
-        }
+        self._attr_device_info = _device_info(trap_id, model)
 
     def update_value(self, rssi: int | None):
         self._attr_native_value = rssi
@@ -220,14 +230,12 @@ class SwissinnoLastSeenSensor(SensorEntity):
     _attr_icon = "mdi:clock-outline"
     _attr_translation_key = "last_seen"
 
-    def __init__(self, trap_id: str, last_seen: datetime):
+    def __init__(
+        self, trap_id: str, last_seen: datetime, model: str | None
+    ):
         self._attr_unique_id = entity_unique_id(trap_id, "last_seen")
         self._attr_native_value = last_seen
-        self._attr_device_info = {
-            "identifiers": {(DOMAIN, trap_id)},
-            "manufacturer": "SWISSINNO",
-            "name": f"SWISSINNO Trap {trap_id}",
-        }
+        self._attr_device_info = _device_info(trap_id, model)
 
     def update_value(self, last_seen: datetime) -> None:
         self._attr_native_value = last_seen
@@ -242,14 +250,15 @@ class SwissinnoLastTriggeredSensor(SensorEntity):
     _attr_icon = "mdi:clock-alert-outline"
     _attr_translation_key = "last_triggered"
 
-    def __init__(self, trap_id: str, last_triggered: datetime | None):
+    def __init__(
+        self,
+        trap_id: str,
+        last_triggered: datetime | None,
+        model: str | None,
+    ):
         self._attr_unique_id = entity_unique_id(trap_id, "last_triggered")
         self._attr_native_value = last_triggered
-        self._attr_device_info = {
-            "identifiers": {(DOMAIN, trap_id)},
-            "manufacturer": "SWISSINNO",
-            "name": f"SWISSINNO Trap {trap_id}",
-        }
+        self._attr_device_info = _device_info(trap_id, model)
 
     def update_value(self, last_triggered: datetime | None) -> None:
         if self._attr_native_value == last_triggered:
@@ -267,14 +276,12 @@ class SwissinnoTriggerCountSensor(SensorEntity):
     _attr_suggested_display_precision = 0
     _attr_translation_key = "trigger_count"
 
-    def __init__(self, trap_id: str, trigger_count: int):
+    def __init__(
+        self, trap_id: str, trigger_count: int, model: str | None
+    ):
         self._attr_unique_id = entity_unique_id(trap_id, "trigger_count")
         self._attr_native_value = trigger_count
-        self._attr_device_info = {
-            "identifiers": {(DOMAIN, trap_id)},
-            "manufacturer": "SWISSINNO",
-            "name": f"SWISSINNO Trap {trap_id}",
-        }
+        self._attr_device_info = _device_info(trap_id, model)
 
     def update_value(self, trigger_count: int) -> None:
         if self._attr_native_value == trigger_count:

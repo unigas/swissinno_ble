@@ -213,6 +213,19 @@ class MetadataTests(unittest.TestCase):
             sensor_source,
         )
 
+    def test_detected_family_is_exposed_as_device_model(self):
+        binary_source = (INTEGRATION / "binary_sensor.py").read_text(
+            encoding="utf-8"
+        )
+        button_source = (INTEGRATION / "button.py").read_text(encoding="utf-8")
+        sensor_source = (INTEGRATION / "sensor.py").read_text(encoding="utf-8")
+
+        self.assertIn("model=frame.model", binary_source)
+        self.assertIn("frame.model", button_source)
+        self.assertIn("model=model", button_source)
+        self.assertIn("def _device_info(trap_id: str, model:", sensor_source)
+        self.assertIn("model=model", sensor_source)
+
     def test_repeated_manufacturer_advertisements_are_delivered(self):
         binary_source = (INTEGRATION / "binary_sensor.py").read_text(
             encoding="utf-8"

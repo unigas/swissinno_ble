@@ -133,14 +133,16 @@ changing entity IDs or automations. See Home Assistant's
 
 SWISSINNO devices use two observed 10-byte formats:
 
-| Family | Marker | Status field | Ready (`off`) | Caught (`on`) |
-| --- | --- | --- | --- | --- |
-| Connect SuperCat | byte 6 = `0x01` | byte 0 | `0x00` | `0x01` |
-| Electronic SuperCat | byte 6 = `0x02` | byte 9 | `0x00` | `0x01` |
+| Family | Home Assistant model | Marker | Status field | Ready (`off`) | Caught (`on`) |
+| --- | --- | --- | --- | --- | --- |
+| Connect | Connect SuperCat | byte 6 = `0x01` | byte 0 | `0x00` | `0x01` |
+| Electronic | Electronic SuperCat | byte 6 = `0x02` | byte 9 | `0x00` | `0x01` |
+| Legacy | SuperCat (legacy protocol) | other/absent | byte 0 | `0x00` | `0x01` |
 
 For Connect frames, bytes 2–5 are the stable hardware ID. They are not a
 counter/status field. Unknown status values are reported as unknown instead of
-being guessed as ready or triggered.
+being guessed as ready or triggered. The detected family is shown as the model
+on the Home Assistant device page.
 
 ## Trigger history and automations
 

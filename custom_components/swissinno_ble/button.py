@@ -76,7 +76,9 @@ async def async_setup_entry(
             address,
         )
 
-        button = SwissinnoResetButton(hass, address, trap_id)
+        button = SwissinnoResetButton(
+            hass, address, trap_id, frame.model
+        )
         buttons[trap_id] = button
 
         async_add_entities([button])
@@ -97,7 +99,9 @@ class SwissinnoResetButton(ButtonEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "reset_trap"
 
-    def __init__(self, hass: HomeAssistant, address: str, trap_id: str):
+    def __init__(
+        self, hass: HomeAssistant, address: str, trap_id: str, model: str
+    ):
         self._hass = hass
         self._address = address
         self._trap_id = trap_id
@@ -109,7 +113,7 @@ class SwissinnoResetButton(ButtonEntity):
             identifiers={(DOMAIN, trap_id)},
             name=f"SWISSINNO Trap {trap_id}",
             manufacturer="SWISSINNO",
-            model="BLE Trap",
+            model=model,
         )
 
     async def async_press(self) -> None:

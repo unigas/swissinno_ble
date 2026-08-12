@@ -9,6 +9,8 @@
   statistics.
 - Added localized entity names in all 24 supported languages and documented
   built-in Home Assistant device triggers and resettable Counter helpers.
+- Show Connect SuperCat, Electronic SuperCat or the legacy protocol family as
+  the device model in Home Assistant.
 
 ## 1.0.29
 

@@ -14,6 +14,7 @@ class TrapObservation:
     rssi: int | None
     battery_v: float | None
     legacy_trap_ids: tuple[str, ...]
+    model: str | None = None
     last_seen: datetime | None = None
     last_triggered: datetime | None = None
     trigger_count: int = 0

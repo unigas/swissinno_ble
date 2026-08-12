@@ -8,6 +8,9 @@ ELECTRONIC_TRAP_MARKER = 0x02
 MANUFACTURER_ID = 3003
 STATUS_READY = 0x00
 STATUS_TRIGGERED = 0x01
+MODEL_CONNECT_SUPERCAT = "Connect SuperCat"
+MODEL_ELECTRONIC_SUPERCAT = "Electronic SuperCat"
+MODEL_LEGACY_SUPERCAT = "SuperCat (legacy protocol)"
 
 
 @dataclass
@@ -21,6 +24,7 @@ class DecodedTrapFrame:
     legacy_trap_ids: tuple[str, ...]
     battery_raw: int | None
     battery_volts: float | None
+    model: str
 
 
 def _battery_to_volts(raw: int | None) -> float | None:
@@ -82,6 +86,7 @@ def decode_frame(payload: bytes) -> DecodedTrapFrame | None:
             legacy_trap_ids=(_hex_id(trap_id_bytes),),
             battery_raw=battery_raw,
             battery_volts=_extended_battery_to_volts(battery_raw),
+            model=MODEL_ELECTRONIC_SUPERCAT,
         )
 
     # Connect SuperCat format (10 bytes minimum).
@@ -113,6 +118,7 @@ def decode_frame(payload: bytes) -> DecodedTrapFrame | None:
             legacy_trap_ids=(trap_id, _hex_id(payload[1:4])),
             battery_raw=battery_raw,
             battery_volts=battery_volts,
+            model=MODEL_CONNECT_SUPERCAT,
         )
 
     # ----------------------------------------------------------------------
@@ -143,6 +149,7 @@ def decode_frame(payload: bytes) -> DecodedTrapFrame | None:
         legacy_trap_ids=(trap_id,),
         battery_raw=battery_raw,
         battery_volts=battery_volts,
+        model=MODEL_LEGACY_SUPERCAT,
     )
 
 
