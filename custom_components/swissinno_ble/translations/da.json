@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Sidst set"
+      },
+      "last_triggered": {
+        "name": "Senest udløst"
+      },
+      "trigger_count": {
+        "name": "Antal udløsninger"
       }
     }
   }

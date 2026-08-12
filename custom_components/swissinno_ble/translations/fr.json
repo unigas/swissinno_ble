@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Dernière détection"
+      },
+      "last_triggered": {
+        "name": "Dernier déclenchement"
+      },
+      "trigger_count": {
+        "name": "Nombre de déclenchements"
       }
     }
   }

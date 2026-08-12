@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Posljednji put viđeno"
+      },
+      "last_triggered": {
+        "name": "Posljednje aktiviranje"
+      },
+      "trigger_count": {
+        "name": "Broj aktiviranja"
       }
     }
   }

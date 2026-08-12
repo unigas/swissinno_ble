@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Sást síðast"
+      },
+      "last_triggered": {
+        "name": "Síðast virkjuð"
+      },
+      "trigger_count": {
+        "name": "Fjöldi virkjana"
       }
     }
   }

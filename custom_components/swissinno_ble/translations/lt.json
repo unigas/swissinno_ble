@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Paskutinį kartą aptikta"
+      },
+      "last_triggered": {
+        "name": "Paskutinį kartą suveikė"
+      },
+      "trigger_count": {
+        "name": "Suveikimų skaičius"
       }
     }
   }

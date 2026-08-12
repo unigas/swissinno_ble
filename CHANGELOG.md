@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.30
+
+- Added a persistent Last triggered timestamp and Trigger count for every trap.
+- Count only confirmed Ready-to-Caught transitions; repeated caught packets and
+  the initial state after setup or reload do not create false trigger events.
+- Marked Trigger count as a total-increasing sensor for Home Assistant long-term
+  statistics.
+- Added localized entity names in all 24 supported languages and documented
+  built-in Home Assistant device triggers and resettable Counter helpers.
+
 ## 1.0.29
 
 - Restricted manual device removal to stale legacy payload-ID devices.

@@ -123,6 +123,7 @@ async def async_setup_entry(
                 legacy_trap_ids=frame.legacy_trap_ids,
                 last_seen=datetime.now(UTC),
             ),
+            is_tripped=frame.is_tripped,
         )
         _clear_advertisement_history(hass, service_info.address)
 

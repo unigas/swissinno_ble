@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Viimati nähtud"
+      },
+      "last_triggered": {
+        "name": "Viimati rakendus"
+      },
+      "trigger_count": {
+        "name": "Rakendumiste arv"
       }
     }
   }

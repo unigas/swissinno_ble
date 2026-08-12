@@ -33,6 +33,10 @@ Helps you place traps for optimal Bluetooth coverage.
 Shows when Home Assistant last received a fresh valid advertisement from each
 trap, making it easy to distinguish a confirmed Ready state from stale data.
 
+### ✔️ Trigger History
+Shows when each trap was last triggered and maintains a persistent count of
+confirmed trigger transitions observed by Home Assistant.
+
 ### ✔️ Remote BLE Reset
 Supported Connect/legacy traps expose a **Reset Trap** button in Home Assistant.
 Electronic high-voltage traps intentionally require switching off and on again.
@@ -88,7 +92,8 @@ The integration will immediately begin scanning for nearby traps.
 No YAML configuration is needed.
 When a trap is detected, Home Assistant creates a **Ready/Caught status**,
 **battery voltage**, **Bluetooth signal strength**, a diagnostic **Last seen**
-timestamp and, for supported Connect/legacy devices, a **Reset Trap** button.
+timestamp, **Last triggered**, a **Trigger count** and, for supported
+Connect/legacy devices, a **Reset Trap** button.
 
 The integration uses the following stable unique IDs internally:
 
@@ -98,6 +103,8 @@ The integration uses the following stable unique IDs internally:
 | Battery voltage | `swissinno_trap_<MAC>_battery` |
 | Signal strength | `swissinno_trap_<MAC>_rssi` |
 | Last seen | `swissinno_trap_<MAC>_last_seen` |
+| Last triggered | `swissinno_trap_<MAC>_last_triggered` |
+| Trigger count | `swissinno_trap_<MAC>_trigger_count` |
 | Reset button | `swissinno_trap_<MAC>_reset` |
 
 `<MAC>` is the Bluetooth address without separators, in lowercase. This makes
@@ -134,6 +141,28 @@ SWISSINNO devices use two observed 10-byte formats:
 For Connect frames, bytes 2–5 are the stable hardware ID. They are not a
 counter/status field. Unknown status values are reported as unknown instead of
 being guessed as ready or triggered.
+
+## Trigger history and automations
+
+Last triggered and Trigger count update only for a confirmed `Ready` to
+`Caught` transition. Repeated advertisements while a trap remains caught do not
+create additional triggers. The first fresh advertisement after setup or reload
+establishes the current state without being counted, because the integration
+cannot know when that state began while it was offline. Trigger count therefore
+means **trigger transitions observed by Home Assistant**, not confirmed animals
+caught.
+
+Home Assistant already provides device triggers for the trap status binary
+sensor. In the automation editor, **turned on** means `Caught` and **turned off**
+means `Ready`. A state trigger from `off` to `on` provides the same caught
+transition explicitly.
+
+The integration's Trigger count is a persistent lifetime total. For a
+resettable count such as “since the trap was emptied”, create a Home Assistant
+Counter helper, increment it from an `off` to `on` status automation and reset
+the helper when required. Mouse, rat and false-alarm classification is not
+present in BLE data and can be recorded separately with Home Assistant helpers
+or automations.
 
 ---
 

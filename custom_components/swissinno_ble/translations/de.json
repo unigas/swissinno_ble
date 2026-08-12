@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Zuletzt gesehen"
+      },
+      "last_triggered": {
+        "name": "Zuletzt ausgelöst"
+      },
+      "trigger_count": {
+        "name": "Auslösungszähler"
       }
     }
   }

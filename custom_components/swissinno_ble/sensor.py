@@ -1,7 +1,11 @@
 import logging
 from datetime import datetime
 
-from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
@@ -28,6 +32,8 @@ async def async_setup_entry(
     battery_stabilizers: dict[str, BatteryStabilizer] = {}
     rssi_sensors: dict[str, SwissinnoRSSISensor] = {}
     last_seen_sensors: dict[str, SwissinnoLastSeenSensor] = {}
+    last_triggered_sensors: dict[str, SwissinnoLastTriggeredSensor] = {}
+    trigger_count_sensors: dict[str, SwissinnoTriggerCountSensor] = {}
     entity_registry = er.async_get(hass)
     coordinator: TrapObservationCoordinator = hass.data[DOMAIN][DATA_COORDINATOR]
 
@@ -86,6 +92,28 @@ async def async_setup_entry(
                 sensor = SwissinnoLastSeenSensor(trap_id, observation.last_seen)
                 last_seen_sensors[trap_id] = sensor
                 async_add_entities([sensor])
+
+        if trap_id in last_triggered_sensors:
+            last_triggered_sensors[trap_id].update_value(
+                observation.last_triggered
+            )
+        else:
+            sensor = SwissinnoLastTriggeredSensor(
+                trap_id, observation.last_triggered
+            )
+            last_triggered_sensors[trap_id] = sensor
+            async_add_entities([sensor])
+
+        if trap_id in trigger_count_sensors:
+            trigger_count_sensors[trap_id].update_value(
+                observation.trigger_count
+            )
+        else:
+            sensor = SwissinnoTriggerCountSensor(
+                trap_id, observation.trigger_count
+            )
+            trigger_count_sensors[trap_id] = sensor
+            async_add_entities([sensor])
 
     entry.async_on_unload(coordinator.register_listener(update_sensors))
 
@@ -203,4 +231,53 @@ class SwissinnoLastSeenSensor(SensorEntity):
 
     def update_value(self, last_seen: datetime) -> None:
         self._attr_native_value = last_seen
+        self.async_write_ha_state()
+
+
+class SwissinnoLastTriggeredSensor(SensorEntity):
+    """Timestamp of the most recent confirmed trigger transition."""
+
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_has_entity_name = True
+    _attr_icon = "mdi:clock-alert-outline"
+    _attr_translation_key = "last_triggered"
+
+    def __init__(self, trap_id: str, last_triggered: datetime | None):
+        self._attr_unique_id = entity_unique_id(trap_id, "last_triggered")
+        self._attr_native_value = last_triggered
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, trap_id)},
+            "manufacturer": "SWISSINNO",
+            "name": f"SWISSINNO Trap {trap_id}",
+        }
+
+    def update_value(self, last_triggered: datetime | None) -> None:
+        if self._attr_native_value == last_triggered:
+            return
+        self._attr_native_value = last_triggered
+        self.async_write_ha_state()
+
+
+class SwissinnoTriggerCountSensor(SensorEntity):
+    """Count confirmed trigger transitions observed by Home Assistant."""
+
+    _attr_has_entity_name = True
+    _attr_icon = "mdi:counter"
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
+    _attr_suggested_display_precision = 0
+    _attr_translation_key = "trigger_count"
+
+    def __init__(self, trap_id: str, trigger_count: int):
+        self._attr_unique_id = entity_unique_id(trap_id, "trigger_count")
+        self._attr_native_value = trigger_count
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, trap_id)},
+            "manufacturer": "SWISSINNO",
+            "name": f"SWISSINNO Trap {trap_id}",
+        }
+
+    def update_value(self, trigger_count: int) -> None:
+        if self._attr_native_value == trigger_count:
+            return
+        self._attr_native_value = trigger_count
         self.async_write_ha_state()

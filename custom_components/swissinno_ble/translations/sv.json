@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Senast sedd"
+      },
+      "last_triggered": {
+        "name": "Senast utlöst"
+      },
+      "trigger_count": {
+        "name": "Antal utlösningar"
       }
     }
   }

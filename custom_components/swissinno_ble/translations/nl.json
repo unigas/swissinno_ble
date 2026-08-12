@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Laatst gezien"
+      },
+      "last_triggered": {
+        "name": "Laatst geactiveerd"
+      },
+      "trigger_count": {
+        "name": "Aantal activeringen"
       }
     }
   }

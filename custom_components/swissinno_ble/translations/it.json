@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Ultimo rilevamento"
+      },
+      "last_triggered": {
+        "name": "Ultima attivazione"
+      },
+      "trigger_count": {
+        "name": "Numero di attivazioni"
       }
     }
   }

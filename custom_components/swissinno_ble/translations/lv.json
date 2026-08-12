@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Pēdējo reizi redzēts"
+      },
+      "last_triggered": {
+        "name": "Pēdējo reizi aktivizēts"
+      },
+      "trigger_count": {
+        "name": "Aktivizēšanas reižu skaits"
       }
     }
   }
