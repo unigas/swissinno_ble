@@ -139,6 +139,14 @@ class MetadataTests(unittest.TestCase):
                 states,
             )
 
+        swedish_sensors = json.loads(
+            (INTEGRATION / "translations" / "sv.json").read_text(
+                encoding="utf-8"
+            )
+        )["entity"]["sensor"]
+        self.assertEqual(swedish_sensors["last_triggered"]["name"], "Senaste slag")
+        self.assertEqual(swedish_sensors["trigger_count"]["name"], "Antal slag")
+
         translation_dir = INTEGRATION / "translations"
         self.assertEqual(
             {path.stem for path in translation_dir.glob("*.json")},

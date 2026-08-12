@@ -40,10 +40,10 @@
         "name": "Senast sedd"
       },
       "last_triggered": {
-        "name": "Senast utlöst"
+        "name": "Senaste slag"
       },
       "trigger_count": {
-        "name": "Antal utlösningar"
+        "name": "Antal slag"
       }
     }
   }
