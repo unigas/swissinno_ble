@@ -267,14 +267,20 @@ Connect/legacy traps use a one-byte battery value:
 Voltage = (raw * 3.6) / 255
 ```
 
-Electronic traps use a two-byte little-endian value:
+Electronic SuperCat uses byte 7 as a battery-related value and estimates the
+nominal 6 V battery-pack voltage on a 0–6 V scale:
 
 ```
-Voltage = raw / 156
+Estimated voltage = (raw * 6.0) / 255
 ```
 
-Version 1.0.23 and later suggest two decimal places, so a decoded reading such
-as 2.37 V is no longer normally displayed as 2 V.
+Byte 8 is deliberately excluded. Captured advertisements show that it changes
+after configuration writes in the official app while the battery-related byte
+remains unchanged. The Electronic voltage should therefore be treated as an
+estimate rather than a calibrated measurement.
+
+Version 1.0.23 and later suggest two decimal places, so a decoded Connect
+reading such as 2.37 V is no longer normally displayed as 2 V.
 
 ### ❓ Trap state updates slowly?
 Move the trap closer to the receiver or use more BLE proxies.

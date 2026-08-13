@@ -2,6 +2,12 @@
 
 ## 1.0.30
 
+- Corrected Electronic SuperCat battery decoding to use its battery-related
+  byte on an estimated 0–6 V scale. The following byte is no longer treated as
+  a battery high byte because captures show it changes after app configuration
+  writes without a corresponding battery change.
+- Added regression coverage for Electronic configuration-byte changes and the
+  battery ordering observed in the official SWISSINNO app.
 - Added a persistent Last triggered timestamp and Trigger count for every trap.
 - Count only confirmed Ready-to-Caught transitions; repeated caught packets and
   the initial state after setup or reload do not create false trigger events.

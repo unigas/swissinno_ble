@@ -11,6 +11,7 @@ STATUS_TRIGGERED = 0x01
 MODEL_CONNECT_SUPERCAT = "Connect SuperCat"
 MODEL_ELECTRONIC_SUPERCAT = "Electronic SuperCat"
 MODEL_LEGACY_SUPERCAT = "SuperCat (legacy protocol)"
+ELECTRONIC_BATTERY_MAX_VOLTS = 6.0
 
 
 @dataclass
@@ -34,9 +35,9 @@ def _battery_to_volts(raw: int | None) -> float | None:
     return round((raw * 3.6) / 255.0, 2)
 
 
-def _extended_battery_to_volts(raw: int) -> float:
-    """Convert the two-byte battery value used by newer traps to volts."""
-    return round(raw / 156.0, 2)
+def _electronic_battery_to_volts(raw: int) -> float:
+    """Estimate the Electronic SuperCat pack voltage from its battery byte."""
+    return round((raw * ELECTRONIC_BATTERY_MAX_VOLTS) / 255.0, 2)
 
 
 def _decode_binary_status(status: int) -> bool | None:
@@ -64,17 +65,19 @@ def decode_frame(payload: bytes) -> DecodedTrapFrame | None:
     if len(payload) < 6:
         return None
 
-    # Electronic SuperCat traps use byte 6 as a layout marker, bytes 7-8 as a
-    # little-endian battery value, and byte 9 as the binary alarm state. Byte 0
-    # varies between observed advertisements and is not the state for this
-    # family.
+    # Electronic SuperCat traps use byte 6 as a layout marker, byte 7 as the
+    # battery-related value, and byte 9 as the binary alarm state. Byte 8 has
+    # been observed changing after configuration writes while byte 7 remained
+    # stable, so it must not be interpreted as the battery value's high byte.
+    # Byte 0 varies between observed advertisements and is not the state for
+    # this family.
     if len(payload) >= NEW_FRAME_MIN_LEN and payload[6] == ELECTRONIC_TRAP_MARKER:
         trap_id_bytes = payload[2:6]
         if not any(trap_id_bytes):
             return None
 
         status = payload[9]
-        battery_raw = int.from_bytes(payload[7:9], "little")
+        battery_raw = payload[7]
 
         return DecodedTrapFrame(
             version=payload[0],
@@ -85,7 +88,7 @@ def decode_frame(payload: bytes) -> DecodedTrapFrame | None:
             trap_id=_hex_id(trap_id_bytes),
             legacy_trap_ids=(_hex_id(trap_id_bytes),),
             battery_raw=battery_raw,
-            battery_volts=_extended_battery_to_volts(battery_raw),
+            battery_volts=_electronic_battery_to_volts(battery_raw),
             model=MODEL_ELECTRONIC_SUPERCAT,
         )
 
