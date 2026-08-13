@@ -200,6 +200,22 @@ Home Assistant.
 
 # 📊 Lovelace Dashboard Example
 
+For a compact trap-focused presentation, install
+[`unigas/swissinno-card`](https://github.com/unigas/swissinno-card) as a
+**Dashboard** custom repository in HACS and add:
+
+```yaml
+type: custom:swissinno-card
+entity: binary_sensor.your_trap_status
+```
+
+The card automatically discovers the battery, signal strength, Last seen,
+trigger history and (when supported) reset entities belonging to the same trap.
+It remains optional; the built-in Entities card below works without a custom
+frontend resource.
+
+## Built-in Entities card
+
 ```yaml
 type: entities
 title: 🐀 SWISSINNO Trap — Kitchen
@@ -232,8 +248,8 @@ entities:
 
 Replace the placeholder entity IDs with the actual IDs shown by Home Assistant.
 Electronic SuperCat traps do not create a reset button, so omit that row for
-electronic traps. No custom Lovelace card is required; battery voltage suggests
-two decimal places from version 1.0.23 onward.
+electronic traps. Battery voltage suggests two decimal places from version
+1.0.23 onward.
 
 ---
 
