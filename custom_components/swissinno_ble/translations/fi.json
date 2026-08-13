@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Viimeksi havaittu"
+      },
+      "last_triggered": {
+        "name": "Viimeksi lauennut"
+      },
+      "trigger_count": {
+        "name": "Laukeamisten määrä"
       }
     }
   }

@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Senast sedd"
+      },
+      "last_triggered": {
+        "name": "Senaste slag"
+      },
+      "trigger_count": {
+        "name": "Antal slag"
       }
     }
   }

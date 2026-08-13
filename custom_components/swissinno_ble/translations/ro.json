@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Văzut ultima dată"
+      },
+      "last_triggered": {
+        "name": "Ultima declanșare"
+      },
+      "trigger_count": {
+        "name": "Număr de declanșări"
       }
     }
   }

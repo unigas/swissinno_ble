@@ -1,0 +1,63 @@
+name: Feature request
+description: Suggest a focused improvement to the integration
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and did not find the same request.
+          required: true
+        - label: I considered whether this can already be achieved with a Home Assistant automation or helper.
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: Explain the user need rather than only the proposed implementation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed behavior
+      description: Describe what the integration should expose or do.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include any Home Assistant automation, helper, template, or dashboard solution you tried.
+
+  - type: dropdown
+    id: trap_family
+    attributes:
+      label: Relevant trap family
+      options:
+        - All supported traps
+        - Connect SuperCat
+        - Electronic SuperCat
+        - Legacy or unknown
+        - Not hardware-specific
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Protocol evidence, if applicable
+      description: For new BLE data, include documentation or repeatable complete payload captures. Unknown values will not be mapped by guesswork.
+      render: text
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Add mockups, screenshots, links, or other relevant information.

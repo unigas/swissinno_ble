@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Utoljára észlelve"
+      },
+      "last_triggered": {
+        "name": "Utolsó aktiválás"
+      },
+      "trigger_count": {
+        "name": "Aktiválások száma"
       }
     }
   }

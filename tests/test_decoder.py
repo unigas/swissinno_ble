@@ -29,6 +29,7 @@ class DecoderTests(unittest.TestCase):
         self.assertEqual(frame.device_type, 0x01)
         self.assertIsNone(frame.event_counter)
         self.assertEqual(frame.trap_id, "CE030400")
+        self.assertEqual(frame.model, "Connect SuperCat")
         self.assertEqual(frame.legacy_trap_ids, ("CE030400", "3FCE03"))
         self.assertEqual(frame.battery_volts, 3.08)
 
@@ -92,8 +93,9 @@ class DecoderTests(unittest.TestCase):
         self.assertFalse(frame.is_tripped)
         self.assertEqual(frame.status, 0x00)
         self.assertEqual(frame.trap_id, "68070700")
-        self.assertEqual(frame.battery_raw, 468)
-        self.assertEqual(frame.battery_volts, 3.0)
+        self.assertEqual(frame.model, "Electronic SuperCat")
+        self.assertEqual(frame.battery_raw, 0xD4)
+        self.assertEqual(frame.battery_volts, 4.99)
 
     def test_newer_frame_triggered(self):
         frame = decoder.decode_frame(bytes.fromhex("40 00 68 07 07 00 02 D4 01 01"))
@@ -101,8 +103,33 @@ class DecoderTests(unittest.TestCase):
         self.assertTrue(frame.is_tripped)
         self.assertEqual(frame.status, 0x01)
         self.assertEqual(frame.trap_id, "68070700")
-        self.assertEqual(frame.battery_raw, 468)
-        self.assertEqual(frame.battery_volts, 3.0)
+        self.assertEqual(frame.battery_raw, 0xD4)
+        self.assertEqual(frame.battery_volts, 4.99)
+
+    def test_electronic_configuration_byte_does_not_change_battery(self):
+        """Byte 8 changes after app writes and is not a battery high byte."""
+        for configuration_byte in (0x00, 0x01, 0x02, 0x04):
+            with self.subTest(configuration_byte=configuration_byte):
+                payload = bytes.fromhex("10 00 9F 00 07 00 02 E1 00 00")
+                payload = payload[:8] + bytes([configuration_byte]) + payload[9:]
+                frame = decoder.decode_frame(payload)
+                self.assertIsNotNone(frame)
+                self.assertEqual(frame.battery_raw, 0xE1)
+                self.assertEqual(frame.battery_volts, 5.29)
+
+    def test_electronic_battery_values_follow_official_app_order(self):
+        """Observed battery bytes preserve the official app's bar ordering."""
+        expected = ((0xDC, 5.18), (0xE1, 5.29), (0xE3, 5.34), (0xFF, 6.0))
+        decoded = []
+        for raw, volts in expected:
+            payload = bytes.fromhex("10 00 68 07 07 00 02 00 01 00")
+            payload = payload[:7] + bytes([raw]) + payload[8:]
+            frame = decoder.decode_frame(payload)
+            self.assertIsNotNone(frame)
+            self.assertEqual(frame.battery_raw, raw)
+            self.assertEqual(frame.battery_volts, volts)
+            decoded.append(frame.battery_volts)
+        self.assertEqual(decoded, sorted(decoded))
 
     def test_electronic_trap_does_not_offer_remote_reset(self):
         payload = bytes.fromhex("40 00 68 07 07 00 02 D4 01 01")
@@ -126,6 +153,7 @@ class DecoderTests(unittest.TestCase):
         self.assertIsNotNone(frame)
         self.assertTrue(frame.is_tripped)
         self.assertEqual(frame.trap_id, "AABBCCDD")
+        self.assertEqual(frame.model, "SuperCat (legacy protocol)")
         self.assertEqual(frame.battery_volts, 3.6)
 
     def test_legacy_ready_frame(self):

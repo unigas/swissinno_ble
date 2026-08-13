@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Nazadnje zaznano"
+      },
+      "last_triggered": {
+        "name": "Nazadnje sprožena"
+      },
+      "trigger_count": {
+        "name": "Število sprožitev"
       }
     }
   }

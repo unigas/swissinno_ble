@@ -1,15 +1,29 @@
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceEntry
+from homeassistant.helpers.storage import Store
 
 from .const import DATA_COORDINATOR, DOMAIN, is_legacy_payload_trap_id
-from .coordinator import TrapObservationCoordinator
+from .coordinator import (
+    TrapObservationCoordinator,
+    TriggerHistoryStorage,
+    trigger_history_from_storage,
+)
+
+_STORAGE_VERSION = 1
+_STORAGE_KEY = f"{DOMAIN}.trigger_history"
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up SWISSINNO BLE integration."""
-    hass.data.setdefault(DOMAIN, {})[DATA_COORDINATOR] = (
-        TrapObservationCoordinator()
+    store = Store[TriggerHistoryStorage](hass, _STORAGE_VERSION, _STORAGE_KEY)
+    trigger_history = trigger_history_from_storage(await store.async_load())
+
+    def schedule_history_save(data: TriggerHistoryStorage) -> None:
+        store.async_delay_save(lambda: data, 1)
+
+    hass.data.setdefault(DOMAIN, {})[DATA_COORDINATOR] = TrapObservationCoordinator(
+        trigger_history, schedule_history_save
     )
     await hass.config_entries.async_forward_entry_setups(
         entry, ["binary_sensor", "sensor", "button"]

@@ -57,7 +57,8 @@ async def async_setup_entry(
         if MANUFACTURER_ID not in man:
             return
 
-        frame = decode_frame(man[MANUFACTURER_ID])
+        payload = man[MANUFACTURER_ID]
+        frame = decode_frame(payload)
         if not frame:
             return
 
@@ -84,18 +85,23 @@ async def async_setup_entry(
                     break
 
         _LOGGER.debug(
-            "Trap %s: status=0x%02X, tripped=%s, RSSI=%s dBm, battery=%s V",
+            "Trap %s (%s): status=0x%02X, tripped=%s, RSSI=%s dBm, "
+            "battery=%s V, manufacturer_payload=%s",
             trap_id,
+            frame.model,
             frame.status,
             frame.is_tripped,
             rssi,
             frame.battery_volts,
+            payload.hex(" ").upper(),
         )
 
         if trap_id in sensors:
             sensors[trap_id].update_state(frame.is_tripped)
         else:
-            entity = SwissinnoTrapSensor(trap_id, frame.is_tripped)
+            entity = SwissinnoTrapSensor(
+                trap_id, frame.is_tripped, frame.model
+            )
             sensors[trap_id] = entity
             async_add_entities([entity], update_before_add=True)
 
@@ -121,8 +127,10 @@ async def async_setup_entry(
                 rssi=rssi,
                 battery_v=frame.battery_volts,
                 legacy_trap_ids=frame.legacy_trap_ids,
+                model=frame.model,
                 last_seen=datetime.now(UTC),
             ),
+            is_tripped=frame.is_tripped,
         )
         _clear_advertisement_history(hass, service_info.address)
 
@@ -153,7 +161,7 @@ class SwissinnoTrapSensor(BinarySensorEntity):
     _attr_icon = "mdi:rodent"
     _attr_translation_key = "trap_status"
 
-    def __init__(self, trap_id: str, tripped: bool | None):
+    def __init__(self, trap_id: str, tripped: bool | None, model: str):
         self._trap_id = trap_id
         self._state = tripped
         self._attr_available = True
@@ -164,6 +172,7 @@ class SwissinnoTrapSensor(BinarySensorEntity):
             identifiers={(DOMAIN, trap_id)},
             manufacturer="SWISSINNO",
             name=f"SWISSINNO Trap {trap_id}",
+            model=model,
         )
 
     @property

@@ -33,7 +33,7 @@ class MetadataTests(unittest.TestCase):
         self.assertTrue(manifest["config_flow"])
         self.assertTrue(manifest["single_config_entry"])
         self.assertEqual(manifest["integration_type"], "hub")
-        self.assertEqual(manifest["version"], "1.0.29")
+        self.assertEqual(manifest["version"], "1.0.30")
         self.assertIn("issue_tracker", manifest)
         self.assertIn("bluetooth_adapters", manifest["dependencies"])
         self.assertTrue((ROOT / "CHANGELOG.md").exists())
@@ -139,6 +139,14 @@ class MetadataTests(unittest.TestCase):
                 states,
             )
 
+        swedish_sensors = json.loads(
+            (INTEGRATION / "translations" / "sv.json").read_text(
+                encoding="utf-8"
+            )
+        )["entity"]["sensor"]
+        self.assertEqual(swedish_sensors["last_triggered"]["name"], "Senaste slag")
+        self.assertEqual(swedish_sensors["trigger_count"]["name"], "Antal slag")
+
         translation_dir = INTEGRATION / "translations"
         self.assertEqual(
             {path.stem for path in translation_dir.glob("*.json")},
@@ -189,6 +197,49 @@ class MetadataTests(unittest.TestCase):
         )
         self.assertIn("observation.last_seen", update_section)
         self.assertNotIn("observation.last_seen", migration_section)
+
+    def test_trigger_history_entities_are_persistent_and_transition_based(self):
+        init_source = (INTEGRATION / "__init__.py").read_text(encoding="utf-8")
+        binary_source = (INTEGRATION / "binary_sensor.py").read_text(
+            encoding="utf-8"
+        )
+        coordinator_source = (INTEGRATION / "coordinator.py").read_text(
+            encoding="utf-8"
+        )
+        sensor_source = (INTEGRATION / "sensor.py").read_text(encoding="utf-8")
+
+        self.assertIn("Store[TriggerHistoryStorage]", init_source)
+        self.assertIn("store.async_delay_save", init_source)
+        self.assertIn("is_tripped=frame.is_tripped", binary_source)
+        self.assertIn(
+            "previous_state is False and is_tripped is True", coordinator_source
+        )
+        self.assertIn('_attr_translation_key = "last_triggered"', sensor_source)
+        self.assertIn('_attr_translation_key = "trigger_count"', sensor_source)
+        self.assertIn(
+            "_attr_state_class = SensorStateClass.TOTAL_INCREASING",
+            sensor_source,
+        )
+
+    def test_detected_family_is_exposed_as_device_model(self):
+        binary_source = (INTEGRATION / "binary_sensor.py").read_text(
+            encoding="utf-8"
+        )
+        button_source = (INTEGRATION / "button.py").read_text(encoding="utf-8")
+        sensor_source = (INTEGRATION / "sensor.py").read_text(encoding="utf-8")
+
+        self.assertIn("model=frame.model", binary_source)
+        self.assertIn("frame.model", button_source)
+        self.assertIn("model=model", button_source)
+        self.assertIn("def _device_info(trap_id: str, model:", sensor_source)
+        self.assertIn("model=model", sensor_source)
+
+    def test_debug_log_includes_complete_manufacturer_payload(self):
+        binary_source = (INTEGRATION / "binary_sensor.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('manufacturer_payload=%s', binary_source)
+        self.assertIn('payload.hex(" ").upper()', binary_source)
 
     def test_repeated_manufacturer_advertisements_are_delivered(self):
         binary_source = (INTEGRATION / "binary_sensor.py").read_text(

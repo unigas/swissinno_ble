@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Last seen"
+      },
+      "last_triggered": {
+        "name": "Last triggered"
+      },
+      "trigger_count": {
+        "name": "Trigger count"
       }
     }
   }

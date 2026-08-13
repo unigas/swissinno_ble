@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Naposledy zaznamenané"
+      },
+      "last_triggered": {
+        "name": "Naposledy spustená"
+      },
+      "trigger_count": {
+        "name": "Počet spustení"
       }
     }
   }

@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.0.30
+
+- Corrected Electronic SuperCat battery decoding to use its battery-related
+  byte on an estimated 0–6 V scale. The following byte is no longer treated as
+  a battery high byte because captures show it changes after app configuration
+  writes without a corresponding battery change.
+- Added regression coverage for Electronic configuration-byte changes and the
+  battery ordering observed in the official SWISSINNO app.
+- Added a persistent Last triggered timestamp and Trigger count for every trap.
+- Count only confirmed Ready-to-Caught transitions; repeated caught packets and
+  the initial state after setup or reload do not create false trigger events.
+- Marked Trigger count as a total-increasing sensor for Home Assistant long-term
+  statistics.
+- Added localized entity names in all 24 supported languages and documented
+  built-in Home Assistant device triggers and resettable Counter helpers.
+- Show Connect SuperCat, Electronic SuperCat or the legacy protocol family as
+  the device model in Home Assistant.
+- Include the complete manufacturer payload in debug logs so unknown status or
+  fault advertisements can be investigated without adding permanent logging.
+
 ## 1.0.29
 
 - Restricted manual device removal to stale legacy payload-ID devices.

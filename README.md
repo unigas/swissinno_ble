@@ -33,6 +33,10 @@ Helps you place traps for optimal Bluetooth coverage.
 Shows when Home Assistant last received a fresh valid advertisement from each
 trap, making it easy to distinguish a confirmed Ready state from stale data.
 
+### ✔️ Trigger History
+Shows when each trap was last triggered and maintains a persistent count of
+confirmed trigger transitions observed by Home Assistant.
+
 ### ✔️ Remote BLE Reset
 Supported Connect/legacy traps expose a **Reset Trap** button in Home Assistant.
 Electronic high-voltage traps intentionally require switching off and on again.
@@ -88,7 +92,8 @@ The integration will immediately begin scanning for nearby traps.
 No YAML configuration is needed.
 When a trap is detected, Home Assistant creates a **Ready/Caught status**,
 **battery voltage**, **Bluetooth signal strength**, a diagnostic **Last seen**
-timestamp and, for supported Connect/legacy devices, a **Reset Trap** button.
+timestamp, **Last triggered**, a **Trigger count** and, for supported
+Connect/legacy devices, a **Reset Trap** button.
 
 The integration uses the following stable unique IDs internally:
 
@@ -98,6 +103,8 @@ The integration uses the following stable unique IDs internally:
 | Battery voltage | `swissinno_trap_<MAC>_battery` |
 | Signal strength | `swissinno_trap_<MAC>_rssi` |
 | Last seen | `swissinno_trap_<MAC>_last_seen` |
+| Last triggered | `swissinno_trap_<MAC>_last_triggered` |
+| Trigger count | `swissinno_trap_<MAC>_trigger_count` |
 | Reset button | `swissinno_trap_<MAC>_reset` |
 
 `<MAC>` is the Bluetooth address without separators, in lowercase. This makes
@@ -126,14 +133,39 @@ changing entity IDs or automations. See Home Assistant's
 
 SWISSINNO devices use two observed 10-byte formats:
 
-| Family | Marker | Status field | Ready (`off`) | Caught (`on`) |
-| --- | --- | --- | --- | --- |
-| Connect SuperCat | byte 6 = `0x01` | byte 0 | `0x00` | `0x01` |
-| Electronic SuperCat | byte 6 = `0x02` | byte 9 | `0x00` | `0x01` |
+| Family | Home Assistant model | Marker | Status field | Ready (`off`) | Caught (`on`) |
+| --- | --- | --- | --- | --- | --- |
+| Connect | Connect SuperCat | byte 6 = `0x01` | byte 0 | `0x00` | `0x01` |
+| Electronic | Electronic SuperCat | byte 6 = `0x02` | byte 9 | `0x00` | `0x01` |
+| Legacy | SuperCat (legacy protocol) | other/absent | byte 0 | `0x00` | `0x01` |
 
 For Connect frames, bytes 2–5 are the stable hardware ID. They are not a
 counter/status field. Unknown status values are reported as unknown instead of
-being guessed as ready or triggered.
+being guessed as ready or triggered. The detected family is shown as the model
+on the Home Assistant device page. Debug logging includes the complete raw
+manufacturer payload to support investigation of unknown future status values.
+
+## Trigger history and automations
+
+Last triggered and Trigger count update only for a confirmed `Ready` to
+`Caught` transition. Repeated advertisements while a trap remains caught do not
+create additional triggers. The first fresh advertisement after setup or reload
+establishes the current state without being counted, because the integration
+cannot know when that state began while it was offline. Trigger count therefore
+means **trigger transitions observed by Home Assistant**, not confirmed animals
+caught.
+
+Home Assistant already provides device triggers for the trap status binary
+sensor. In the automation editor, **turned on** means `Caught` and **turned off**
+means `Ready`. A state trigger from `off` to `on` provides the same caught
+transition explicitly.
+
+The integration's Trigger count is a persistent lifetime total. For a
+resettable count such as “since the trap was emptied”, create a Home Assistant
+Counter helper, increment it from an `off` to `on` status automation and reset
+the helper when required. Mouse, rat and false-alarm classification is not
+present in BLE data and can be recorded separately with Home Assistant helpers
+or automations.
 
 ---
 
@@ -168,6 +200,22 @@ Home Assistant.
 
 # 📊 Lovelace Dashboard Example
 
+For a compact trap-focused presentation, install
+[`unigas/swissinno-card`](https://github.com/unigas/swissinno-card) as a
+**Dashboard** custom repository in HACS and add:
+
+```yaml
+type: custom:swissinno-card
+entity: binary_sensor.your_trap_status
+```
+
+The card automatically discovers the battery, signal strength, Last seen,
+trigger history and (when supported) reset entities belonging to the same trap.
+It remains optional; the built-in Entities card below works without a custom
+frontend resource.
+
+## Built-in Entities card
+
 ```yaml
 type: entities
 title: 🐀 SWISSINNO Trap — Kitchen
@@ -184,13 +232,24 @@ entities:
   - entity: sensor.your_trap_signal_strength
     name: Signal Strength
 
+  - entity: sensor.your_trap_last_seen
+    name: Last Seen
+
+  - entity: sensor.your_trap_last_triggered
+    name: Last Triggered
+
+  - entity: sensor.your_trap_trigger_count
+    name: Trigger Count
+
+  # Connect/legacy traps only; remove this row for Electronic SuperCat.
   - entity: button.your_trap_reset
     name: Reset Trap
 ```
 
 Replace the placeholder entity IDs with the actual IDs shown by Home Assistant.
-No custom Lovelace card is required; battery voltage suggests two decimal places
-from version 1.0.23 onward.
+Electronic SuperCat traps do not create a reset button, so omit that row for
+electronic traps. Battery voltage suggests two decimal places from version
+1.0.23 onward.
 
 ---
 
@@ -208,14 +267,20 @@ Connect/legacy traps use a one-byte battery value:
 Voltage = (raw * 3.6) / 255
 ```
 
-Electronic traps use a two-byte little-endian value:
+Electronic SuperCat uses byte 7 as a battery-related value and estimates the
+nominal 6 V battery-pack voltage on a 0–6 V scale:
 
 ```
-Voltage = raw / 156
+Estimated voltage = (raw * 6.0) / 255
 ```
 
-Version 1.0.23 and later suggest two decimal places, so a decoded reading such
-as 2.37 V is no longer normally displayed as 2 V.
+Byte 8 is deliberately excluded. Captured advertisements show that it changes
+after configuration writes in the official app while the battery-related byte
+remains unchanged. The Electronic voltage should therefore be treated as an
+estimate rather than a calibrated measurement.
+
+Version 1.0.23 and later suggest two decimal places, so a decoded Connect
+reading such as 2.37 V is no longer normally displayed as 2 V.
 
 ### ❓ Trap state updates slowly?
 Move the trap closer to the receiver or use more BLE proxies.
@@ -256,9 +321,9 @@ then remove only the unavailable legacy duplicates from Home Assistant.
 # 🤝 Contributing
 
 Contributions are welcome!
-- Found a bug? Open an issue.  
-- Want a new feature? Create a pull request.  
-- Improvements to decoding or UI are highly appreciated.  
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull
+request. Improvements to decoding, hardware support, translations, tests and
+documentation are highly appreciated.
 
 ---
 

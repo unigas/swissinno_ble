@@ -38,6 +38,12 @@
       },
       "last_seen": {
         "name": "Sist sett"
+      },
+      "last_triggered": {
+        "name": "Sist utløst"
+      },
+      "trigger_count": {
+        "name": "Antall utløsninger"
       }
     }
   }
