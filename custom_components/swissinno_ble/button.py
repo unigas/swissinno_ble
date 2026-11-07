@@ -1,6 +1,7 @@
 """Button platform for SWISSINNO BLE traps."""
 
 import logging
+from time import monotonic
 
 from homeassistant.components.bluetooth import (
     BluetoothScanningMode,
@@ -23,6 +24,7 @@ from .const import (
     normalized_address,
 )
 from .decoder import decode_frame, supports_remote_reset
+from .freshness import is_fresh_advertisement
 from .reset import async_reset_trap
 
 _LOGGER = logging.getLogger(__name__)
@@ -36,9 +38,17 @@ async def async_setup_entry(
 
     buttons = {}
     entity_registry = er.async_get(hass)
+    accept_after = monotonic()
 
     @callback
     def detection_callback(service_info: BluetoothServiceInfoBleak, change):
+        if not is_fresh_advertisement(service_info.time, accept_after):
+            _LOGGER.debug(
+                "Ignoring cached reset-button advertisement for %s",
+                service_info.address,
+            )
+            return
+
         manufacturer_data = service_info.manufacturer_data
 
         if MANUFACTURER_ID not in manufacturer_data:
