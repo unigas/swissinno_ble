@@ -45,6 +45,22 @@ class TrapIdentityMapTests(unittest.TestCase):
             )
         self.assertEqual(saved, [])
 
+    def test_address_already_owned_by_another_payload_is_not_persisted(self):
+        saved = []
+        identities = identity.TrapIdentityMap(
+            {"9E010400": "cdfe65e69f48"}, saved.append
+        )
+
+        self.assertIsNone(identities.resolve("3FCE0304", "cdfe65e69f48"))
+        self.assertEqual(saved, [])
+        self.assertEqual(
+            identities.resolve("3FCE0304", "c8aedc738048"), "c8aedc738048"
+        )
+        self.assertEqual(
+            saved,
+            [{"9E010400": "cdfe65e69f48", "3FCE0304": "c8aedc738048"}],
+        )
+
     def test_distinct_payload_ids_remain_separate_traps(self):
         identities = identity.TrapIdentityMap({}, lambda _data: None)
 
