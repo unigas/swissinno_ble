@@ -27,8 +27,15 @@ class TrapIdentityMap:
         self._map = dict(data)
         self._save = save
 
-    def resolve(self, payload_id: str, observed: str) -> str:
+    def resolve(self, payload_id: str, observed: str) -> str | None:
         if (canonical := self._map.get(payload_id)) is None:
+            if observed in self._map.values():
+                _LOGGER.debug(
+                    "Ignoring payload %s at address %s already claimed by another trap",
+                    payload_id,
+                    observed,
+                )
+                return None
             self._map[payload_id] = observed
             self._save(dict(self._map))
             return observed
