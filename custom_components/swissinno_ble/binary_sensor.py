@@ -71,6 +71,8 @@ async def async_setup_entry(
         trap_id = identities.resolve(
             frame.trap_id, normalized_address(service_info.address)
         )
+        if trap_id is None:
+            return
         rssi = service_info.rssi
 
         # Versions before 1.0.16 used manufacturer-data bytes in the unique ID.
