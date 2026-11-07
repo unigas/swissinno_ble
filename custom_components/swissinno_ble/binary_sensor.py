@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Callable
 from datetime import UTC, datetime
 from time import monotonic
 
@@ -18,6 +19,7 @@ from homeassistant.helpers.entity import DeviceInfo
 from .const import (
     ADVERTISEMENT_MATCHER,
     DATA_COORDINATOR,
+    DATA_IDENTITY,
     DOMAIN,
     MANUFACTURER_ID,
     entity_unique_id,
@@ -27,6 +29,7 @@ from .const import (
 from .coordinator import TrapObservation, TrapObservationCoordinator
 from .decoder import decode_frame
 from .freshness import is_fresh_advertisement
+from .identity import TrapIdentityMap
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -40,6 +43,9 @@ async def async_setup_entry(
     sensors: dict[str, SwissinnoTrapSensor] = {}
     entity_registry = er.async_get(hass)
     coordinator: TrapObservationCoordinator = hass.data[DOMAIN][DATA_COORDINATOR]
+    identities: TrapIdentityMap = hass.data[DOMAIN][DATA_IDENTITY]
+    tracked_addresses: dict[str, str] = {}
+    cancel_trackers: dict[str, Callable[[], None]] = {}
     accept_after = monotonic()
 
     @callback
@@ -62,7 +68,9 @@ async def async_setup_entry(
         if not frame:
             return
 
-        trap_id = normalized_address(service_info.address)
+        trap_id = identities.resolve(
+            frame.trap_id, normalized_address(service_info.address)
+        )
         rssi = service_info.rssi
 
         # Versions before 1.0.16 used manufacturer-data bytes in the unique ID.
@@ -70,7 +78,7 @@ async def async_setup_entry(
         # not already registered. Existing duplicate entities are left alone so
         # Home Assistant configuration is never destructively rewritten.
         old_unique_ids = legacy_unique_ids(frame.legacy_trap_ids)
-        unique_id = entity_unique_id(service_info.address)
+        unique_id = entity_unique_id(trap_id)
         if not entity_registry.async_get_entity_id(
             "binary_sensor", DOMAIN, unique_id
         ):
@@ -105,18 +113,21 @@ async def async_setup_entry(
             sensors[trap_id] = entity
             async_add_entities([entity], update_before_add=True)
 
+        if tracked_addresses.get(trap_id) != service_info.address:
+            if cancel := cancel_trackers.pop(trap_id, None):
+                cancel()
+
             @callback
             def unavailable_callback(_service_info, trap_id=trap_id):
                 sensors[trap_id].set_unavailable()
                 coordinator.set_unavailable(trap_id)
 
-            entry.async_on_unload(
-                async_track_unavailable(
-                    hass,
-                    unavailable_callback,
-                    service_info.address,
-                    connectable=False,
-                )
+            tracked_addresses[trap_id] = service_info.address
+            cancel_trackers[trap_id] = async_track_unavailable(
+                hass,
+                unavailable_callback,
+                service_info.address,
+                connectable=False,
             )
 
         # Cache before publishing so sensor setup can safely finish after the
@@ -142,6 +153,14 @@ async def async_setup_entry(
     )
 
     entry.async_on_unload(cancel_callback)
+
+    @callback
+    def cancel_unavailable_trackers() -> None:
+        for cancel in cancel_trackers.values():
+            cancel()
+        cancel_trackers.clear()
+
+    entry.async_on_unload(cancel_unavailable_trackers)
 
     _LOGGER.info("SWISSINNO BLE: Bluetooth scanner callback registered.")
 

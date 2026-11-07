@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Prevent duplicate trap devices when a trap changes Bluetooth address (for
+  example after a battery change) or a proxy reports its advertisement under a
+  corrupted or unrelated address. The payload hardware ID is bound to the
+  first address seen and persisted in `swissinno_ble.identities`.
+- Track unavailability on the address the trap currently uses, and let the
+  Reset Trap button follow address changes.
+
 ## 1.0.30
 
 - Corrected Electronic SuperCat battery decoding to use its battery-related

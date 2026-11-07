@@ -109,6 +109,11 @@ The integration uses the following stable unique IDs internally:
 
 `<MAC>` is the Bluetooth address without separators, in lowercase. This makes
 the unique identity stable when advertisement counters or state bytes change.
+Each trap's hardware ID from the advertisement payload is bound to the first
+address it is seen with. If the same trap later appears under another address,
+for example a new random address after a battery change or an advertisement a
+Bluetooth proxy attributes to the wrong address, it updates the existing device
+instead of creating a duplicate.
 Upgrades migrate legacy payload-based unique IDs when possible and preserve the
 existing Home Assistant entity ID. The visible `entity_id` can therefore differ
 from the internal unique ID, especially after an upgrade or a manual rename.

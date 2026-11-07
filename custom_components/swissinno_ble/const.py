@@ -1,5 +1,6 @@
 DOMAIN = "swissinno_ble"
 DATA_COORDINATOR = "coordinator"
+DATA_IDENTITY = "identity"
 
 MANUFACTURER_ID = 3003
 _HEX_CHARACTERS = frozenset("0123456789abcdef")
