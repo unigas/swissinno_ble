@@ -1,6 +1,7 @@
 """Button platform for SWISSINNO BLE traps."""
 
 import logging
+from time import monotonic
 
 from homeassistant.components.bluetooth import (
     BluetoothScanningMode,
@@ -15,6 +16,7 @@ from homeassistant.helpers.entity import DeviceInfo
 
 from .const import (
     CONNECTABLE_ADVERTISEMENT_MATCHER,
+    DATA_IDENTITY,
     DOMAIN,
     MANUFACTURER_ID,
     entity_unique_id,
@@ -22,6 +24,7 @@ from .const import (
     normalized_address,
 )
 from .decoder import decode_frame, supports_remote_reset
+from .freshness import is_fresh_advertisement
 from .reset import async_reset_trap
 
 _LOGGER = logging.getLogger(__name__)
@@ -35,9 +38,17 @@ async def async_setup_entry(
 
     buttons = {}
     entity_registry = er.async_get(hass)
+    accept_after = monotonic()
 
     @callback
     def detection_callback(service_info: BluetoothServiceInfoBleak, change):
+        if not is_fresh_advertisement(service_info.time, accept_after):
+            _LOGGER.debug(
+                "Ignoring cached reset-button advertisement for %s",
+                service_info.address,
+            )
+            return
+
         manufacturer_data = service_info.manufacturer_data
 
         if MANUFACTURER_ID not in manufacturer_data:
@@ -49,11 +60,15 @@ async def async_setup_entry(
             return
 
         address = service_info.address
-        trap_id = normalized_address(address)
+        trap_id = hass.data[DOMAIN][DATA_IDENTITY].resolve(
+            frame.trap_id, normalized_address(address)
+        )
+        if trap_id is None:
+            return
 
         # Versions before 1.0.16 used changing advertisement bytes in the
         # reset button unique ID. Migrate the currently discoverable ID.
-        unique_id = entity_unique_id(address, "reset")
+        unique_id = entity_unique_id(trap_id, "reset")
         if not entity_registry.async_get_entity_id("button", DOMAIN, unique_id):
             for legacy_unique_id in legacy_unique_ids(
                 frame.legacy_trap_ids, "reset"
@@ -67,7 +82,8 @@ async def async_setup_entry(
                     )
                     break
 
-        if trap_id in buttons:
+        if (existing := buttons.get(trap_id)) is not None:
+            existing.address = address
             return
 
         _LOGGER.info(
@@ -115,6 +131,14 @@ class SwissinnoResetButton(ButtonEntity):
             manufacturer="SWISSINNO",
             model=model,
         )
+
+    @property
+    def address(self) -> str:
+        return self._address
+
+    @address.setter
+    def address(self, address: str) -> None:
+        self._address = address
 
     async def async_press(self) -> None:
         await async_reset_trap(self._hass, self._address)
