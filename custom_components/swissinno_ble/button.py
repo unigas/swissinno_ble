@@ -63,6 +63,8 @@ async def async_setup_entry(
         trap_id = hass.data[DOMAIN][DATA_IDENTITY].resolve(
             frame.trap_id, normalized_address(address)
         )
+        if trap_id is None:
+            return
 
         # Versions before 1.0.16 used changing advertisement bytes in the
         # reset button unique ID. Migrate the currently discoverable ID.
