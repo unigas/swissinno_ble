@@ -18,6 +18,7 @@ from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from .battery import BatteryStabilizer
 from .const import DATA_COORDINATOR, DOMAIN, entity_unique_id, legacy_unique_ids
 from .coordinator import TrapObservation, TrapObservationCoordinator
+from .throttle import UpdateThrottle
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -181,6 +182,8 @@ class SwissinnoBatterySensor(SensorEntity):
         self._attr_device_info = _device_info(trap_id, model)
 
     def update_value(self, value: float | None):
+        if self._attr_available and self._attr_native_value == value:
+            return
         self._attr_native_value = value
         self._attr_available = True
         self.async_write_ha_state()
@@ -206,17 +209,21 @@ class SwissinnoRSSISensor(SensorEntity):
         self._attr_available = True
 
         self._attr_unique_id = entity_unique_id(trap_id, "rssi")
+        self._throttle = UpdateThrottle()
         self._attr_native_value = rssi
 
         self._attr_device_info = _device_info(trap_id, model)
 
     def update_value(self, rssi: int | None):
+        if self._attr_available and not self._throttle.ready():
+            return
         self._attr_native_value = rssi
         self._attr_available = True
         self.async_write_ha_state()
 
     @callback
     def set_unavailable(self) -> None:
+        self._throttle.reset()
         self._attr_available = False
         self.async_write_ha_state()
 
@@ -234,10 +241,13 @@ class SwissinnoLastSeenSensor(SensorEntity):
         self, trap_id: str, last_seen: datetime, model: str | None
     ):
         self._attr_unique_id = entity_unique_id(trap_id, "last_seen")
+        self._throttle = UpdateThrottle()
         self._attr_native_value = last_seen
         self._attr_device_info = _device_info(trap_id, model)
 
     def update_value(self, last_seen: datetime) -> None:
+        if not self._throttle.ready():
+            return
         self._attr_native_value = last_seen
         self.async_write_ha_state()
 

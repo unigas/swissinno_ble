@@ -201,6 +201,8 @@ class SwissinnoTrapSensor(BinarySensorEntity):
         return self._state
 
     def update_state(self, tripped: bool | None):
+        if self._attr_available and self._state == tripped:
+            return
         self._state = tripped
         self._attr_available = True
         self.async_write_ha_state()

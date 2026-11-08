@@ -32,6 +32,7 @@ Helps you place traps for optimal Bluetooth coverage.
 ### ✔️ Last Seen Sensor
 Shows when Home Assistant last received a fresh valid advertisement from each
 trap, making it easy to distinguish a confirmed Ready state from stale data.
+Signal strength and Last seen are updated at most once per minute.
 
 ### ✔️ Trigger History
 Shows when each trap was last triggered and maintains a persistent count of
